@@ -1,11 +1,14 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PIRIS_labs.Data.Entities
 {
-  public class User: IdentityUser<Guid>
+  public class Client
   {
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public Guid ID { get; set; }
+
     [Required]
     [MaxLength(250)]
     public string Surname { get; set; }
@@ -49,6 +52,9 @@ namespace PIRIS_labs.Data.Entities
 
     [Required]
     public virtual City RegistrationCity { get; set; }
+
+    [MaxLength(250)]
+    public string Email { get; set; }
 
     [Required]
     [MaxLength(250)]
