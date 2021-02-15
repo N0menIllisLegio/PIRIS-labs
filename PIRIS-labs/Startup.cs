@@ -5,7 +5,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using PIRIS_labs.Data;
-using PIRIS_labs.Data.Entities;
+using PIRIS_labs.Helpers;
+using PIRIS_labs.Services;
 
 namespace PIRIS_labs
 {
@@ -21,15 +22,21 @@ namespace PIRIS_labs
     public void ConfigureServices(IServiceCollection services)
     {
       services.AddDbContext<ApplicationDbContext>(options =>
-          options.UseSqlServer(
-              Configuration.GetConnectionString("LocalDB")));
-
-      services.AddDefaultIdentity<User>(options => options.User.RequireUniqueEmail = true)
-          .AddEntityFrameworkStores<ApplicationDbContext>();
+          options.UseLazyLoadingProxies()
+            .UseSqlServer(Configuration.GetConnectionString("LocalDB")));
 
       services.AddRazorPages();
       services.AddServerSideBlazor();
       services.AddDatabaseDeveloperPageExceptionFilter();
+
+      services.AddAutoMapper(typeof(AutoMapperProfile));
+
+      services.AddScoped<UnitOfWork>();
+      services.AddScoped<ClientsService>();
+      services.AddScoped<CitiesService>();
+      services.AddScoped<DisabilitiesService>();
+      services.AddScoped<NationalitiesService>();
+      services.AddScoped<MaritalStatusesService>();
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -38,6 +45,7 @@ namespace PIRIS_labs
       {
         app.UseDeveloperExceptionPage();
         app.UseMigrationsEndPoint();
+        app.UseBrowserLink();
       }
       else
       {
@@ -49,9 +57,6 @@ namespace PIRIS_labs
       app.UseStaticFiles();
 
       app.UseRouting();
-
-      app.UseAuthentication();
-      app.UseAuthorization();
 
       app.UseEndpoints(endpoints =>
       {
