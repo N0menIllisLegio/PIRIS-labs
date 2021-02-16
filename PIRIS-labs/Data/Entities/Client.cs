@@ -1,24 +1,28 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using PIRIS_labs.Helpers;
 
 namespace PIRIS_labs.Data.Entities
 {
-  public class Client
+  public class Client: IEntity
   {
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public Guid ID { get; set; }
 
     [Required]
     [MaxLength(250)]
+    [ExpressionsBuilder]
     public string Surname { get; set; }
 
     [Required]
     [MaxLength(250)]
+    [ExpressionsBuilder]
     public string Name { get; set; }
 
     [Required]
     [MaxLength(250)]
+    [ExpressionsBuilder]
     public string Patronymic { get; set; }
 
     [Required]
