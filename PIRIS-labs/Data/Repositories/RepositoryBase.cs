@@ -5,11 +5,14 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
+using PIRIS_labs.Data.Entities;
+using PIRIS_labs.DTOs;
+using PIRIS_labs.Helpers;
 
 namespace PIRIS_labs.Data.Repositories
 {
   public abstract class RepositoryBase<TEntity>
-    where TEntity : class
+    where TEntity : class, IEntity
   {
     public RepositoryBase(ApplicationDbContext applicationDbContext)
     {
@@ -20,6 +23,36 @@ namespace PIRIS_labs.Data.Repositories
     protected ApplicationDbContext ApplicationDbContext { get; }
 
     protected DbSet<TEntity> DbSet { get; }
+
+    public async Task<PagedResultDto<TEntity>> GetPagedResultAsync(PagedInfoDto pagedInfoDto,
+      Expression<Func<TEntity, object>> searchedPropertiesSelector,
+      Expression<Func<TEntity, bool>> additionalFilterCriteria = null,
+      Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>> include = null,
+      bool disableTracking = true)
+    {
+      var query = DbSet.SearchBy(pagedInfoDto.SearchString, searchedPropertiesSelector, pagedInfoDto.Filters, additionalFilterCriteria);
+
+      if (disableTracking)
+      {
+        query = query.AsNoTracking();
+      }
+
+      query = query.OrderBy(pagedInfoDto.SortOptions);
+
+      if (include is not null)
+      {
+        query = include(query);
+      }
+
+      var pagedQuery = query.Skip((pagedInfoDto.PageNumber - 1) * pagedInfoDto.PageSize).Take(pagedInfoDto.PageSize);
+
+      return new PagedResultDto<TEntity>
+      {
+        Items = await pagedQuery.ToListAsync(),
+        TotalItemsCount = await query.CountAsync(),
+        PagedInfo = pagedInfoDto
+      };
+    }
 
     public async Task<List<TEntity>> GetAllByWhereAsync(Expression<Func<TEntity, bool>> match,
       bool disableTracking = false)
