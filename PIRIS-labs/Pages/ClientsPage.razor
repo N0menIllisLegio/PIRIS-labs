@@ -6,7 +6,7 @@
 
 <h1>Clients</h1>
 
-<NavLink class="btn btn-success" href="/client/add" Match="NavLinkMatch.All">
+<NavLink class="btn btn-success" href="@link" Match="NavLinkMatch.All">
   Add new client
 </NavLink>
 
@@ -27,6 +27,7 @@ else
 @code
 {
   private IReadOnlyList<MaritalStatusDto> _maritalStatuses;
+  private string link = $"/client/edit";///{Guid.NewGuid()}";
 
   protected override async Task OnInitializedAsync()
   {

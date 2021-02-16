@@ -1,4 +1,4 @@
-﻿@page "/client/add"
+﻿@page "/client/edit/{ClientIDStr?}"
 @using DTOs.Client
 @using Enums
 
@@ -7,8 +7,8 @@
 @inject MaritalStatusesService maritalStatusesService
 
   <div class="container-fluid">
-    <h2 class="ml-5 mt-5">Add new Client</h2>
-    <EditForm Model="@client" >
+    <h2 class="ml-5 mt-5">@Title</h2>
+    <EditForm Model="@client">
       <DataAnnotationsValidator />
       <div class="card m-5">
         <h5 class="card-header">Client Information</h5>
@@ -352,7 +352,12 @@
   </div>
 
   @code {
+      [Parameter]
+      public string ClientIDStr { get; set; }
+
     private const string emailPlaceholder = @"example@gmail.com";
+    private string Title;
+
     private ClientDto client = new ClientDto();
     private IReadOnlyList<MaritalStatusDto> _registrationCities = new List<MaritalStatusDto>();
     private IReadOnlyList<MaritalStatusDto> _actualResidenceCities = new List<MaritalStatusDto>();
@@ -360,10 +365,19 @@
     private IReadOnlyList<MaritalStatusDto> _nationalities = new List<MaritalStatusDto>();
     private IReadOnlyList<MaritalStatusDto> _disabilities = new List<MaritalStatusDto>();
 
+    protected override void OnParametersSet()
+    {
+      // Or client doesnt exist
+      Title = String.IsNullOrEmpty(ClientIDStr)
+        ? @"Add new Client"
+        : @"Edit Client";
+    }
+
 
     protected override async Task OnInitializedAsync()
     {
       _registrationCities = (await maritalStatusesService.GetMaritalStatusesAsync()).ToList();
+
 
       await base.OnInitializedAsync();
     }
