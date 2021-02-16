@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using PIRIS_labs.Enums;
 using PIRIS_labs.Helpers;
 
 namespace PIRIS_labs.Data.Entities
@@ -29,7 +30,7 @@ namespace PIRIS_labs.Data.Entities
     public DateTime Birthday { get; set; }
 
     [Required]
-    public bool Male { get; set; }
+    public Gender Gender { get; set; }
 
     [Required]
     [MaxLength(250)]

@@ -15,9 +15,9 @@ namespace PIRIS_labs.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .UseIdentityColumns()
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
-                .HasAnnotation("ProductVersion", "5.0.3")
-                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                .HasAnnotation("ProductVersion", "5.0.3");
 
             modelBuilder.Entity("PIRIS_labs.Data.Entities.City", b =>
                 {
@@ -221,6 +221,9 @@ namespace PIRIS_labs.Migrations
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
+                    b.Property<int>("Gender")
+                        .HasColumnType("int");
+
                     b.Property<string>("HomePhoneNumber")
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
@@ -231,9 +234,6 @@ namespace PIRIS_labs.Migrations
                         .HasColumnType("nvarchar(250)");
 
                     b.Property<bool>("LiableForMilitaryService")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("Male")
                         .HasColumnType("bit");
 
                     b.Property<string>("MaritalStatusName")
