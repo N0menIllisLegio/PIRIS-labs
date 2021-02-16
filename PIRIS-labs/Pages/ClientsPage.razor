@@ -1,0 +1,37 @@
+﻿@page "/clients"
+
+@using Services
+@using DTOs.MaritalStatus
+@inject MaritalStatusesService maritalStatusesService
+
+<h1>Clients</h1>
+
+<NavLink class="btn btn-success" href="/client/add" Match="NavLinkMatch.All">
+  Add new client
+</NavLink>
+
+@if (_maritalStatuses is not null)
+{
+  @foreach (var maritalStatus in _maritalStatuses)
+  {
+    <div>@maritalStatus.Name</div>
+    <br />
+  }
+
+}
+else
+{
+  <div>Fuck</div>
+}
+
+@code
+{
+  private IReadOnlyList<MaritalStatusDto> _maritalStatuses;
+
+  protected override async Task OnInitializedAsync()
+  {
+    _maritalStatuses = (await maritalStatusesService.GetMaritalStatusesAsync()).ToList();
+
+    await base.OnInitializedAsync();
+  }
+}

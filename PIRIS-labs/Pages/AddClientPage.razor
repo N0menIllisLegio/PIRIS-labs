@@ -1,0 +1,16 @@
+﻿@page "/client/add"
+
+<h3>Add new client page</h3>
+<EditForm Model="@Kek">
+  <InputDate @bind-Value="Kek.Date" />
+</EditForm>
+
+
+@code {
+  class KER
+  {
+    public DateTime Date = DateTime.Now;
+  }
+
+  private KER Kek = new KER();
+}
