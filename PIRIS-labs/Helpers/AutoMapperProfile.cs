@@ -12,13 +12,7 @@ namespace PIRIS_labs.Helpers
   {
     public AutoMapperProfile()
     {
-      CreateMap<Client, ClientDto>()
-        .ForMember(dest => dest.ActualResidenceCity, opt => opt.MapFrom(src => src.ActualResidenceCity.Name))
-        .ForMember(dest => dest.RegistrationCity, opt => opt.MapFrom(src => src.RegistrationCity.Name))
-        .ForMember(dest => dest.MaritalStatus, opt => opt.MapFrom(src => src.MaritalStatus.Name))
-        .ForMember(dest => dest.Nationality, opt => opt.MapFrom(src => src.Nationality.Name))
-        .ForMember(dest => dest.Disability, opt => opt.MapFrom(src => src.Disability.Name));
-
+      CreateMap<Client, ClientDto>().ReverseMap();
       CreateMap<City, CityDto>();
       CreateMap<Disability, DisabilityDto>();
       CreateMap<MaritalStatus, MaritalStatusDto>();

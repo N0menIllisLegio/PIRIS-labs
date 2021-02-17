@@ -22,11 +22,11 @@ namespace PIRIS_labs.DTOs.Client
     public string BirthPlace { get; set; }
 
     [Required]
-    public string ActualResidenceCity { get; set; }
+    public string ActualResidenceCityName { get; set; }
     [Required]
     public string ActualResidenceAddress { get; set; }
     [Required]
-    public string RegistrationCity { get; set; }
+    public string RegistrationCityName { get; set; }
     [Required]
     public string RegistrationAddress { get; set; }
 
@@ -54,11 +54,11 @@ namespace PIRIS_labs.DTOs.Client
     public string Position { get; set; }
 
     [Required]
-    public string MaritalStatus { get; set; }
+    public string MaritalStatusName { get; set; }
     [Required]
-    public string Nationality { get; set; }
+    public string NationalityName { get; set; }
     [Required]
-    public string Disability { get; set; }
+    public string DisabilityName { get; set; }
 
     public int? MonthlyIncome { get; set; }
 

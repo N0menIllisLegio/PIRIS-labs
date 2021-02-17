@@ -36,6 +36,7 @@ namespace PIRIS_labs.Data.Entities
     [MaxLength(250)]
     public string BirthPlace { get; set; }
 
+    public string ActualResidenceCityName { get; set; }
     [Required]
     public virtual City ActualResidenceCity { get; set; }
 
@@ -55,6 +56,7 @@ namespace PIRIS_labs.Data.Entities
     [MaxLength(250)]
     public string Position { get; set; }
 
+    public string RegistrationCityName { get; set; }
     [Required]
     public virtual City RegistrationCity { get; set; }
 
@@ -65,12 +67,15 @@ namespace PIRIS_labs.Data.Entities
     [MaxLength(250)]
     public string RegistrationAddress { get; set; }
 
+    public string MaritalStatusName { get; set; }
     [Required]
     public virtual MaritalStatus MaritalStatus { get; set; }
 
+    public string NationalityName { get; set; }
     [Required]
     public virtual Nationality Nationality { get; set; }
 
+    public string DisabilityName { get; set; }
     [Required]
     public virtual Disability Disability { get; set; }
 
