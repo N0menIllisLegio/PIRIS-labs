@@ -1,396 +1,449 @@
-﻿@page "/client/edit/{ClientIDStr?}"
-@using DTOs.Client
+﻿@page "/client/edit/{ClientID:guid?}"
+
 @using Enums
-
 @using Services
+@using DTOs
 @using DTOs.MaritalStatus
+@using DTOs.City
+@using DTOs.Client
+@using DTOs.Disability
+@using DTOs.Nationality
+
 @inject MaritalStatusesService maritalStatusesService
+@inject DisabilitiesService disabilitiesService
+@inject NationalitiesService nationalitiesService
+@inject CitiesService citiesService
+@inject ClientsService clientsService
 
-  <div class="container-fluid">
-    <h2 class="ml-5 mt-5">@Title</h2>
-    <EditForm Model="@client">
-      <DataAnnotationsValidator />
-      <div class="card m-5">
-        <h5 class="card-header">Client Information</h5>
+@inject NavigationManager NavigationManager
 
-        <div class="card-body">
-          <div class="form-row ml-3 mr-3 mb-3">
-            <div class="col input-group">
-              <div class="input-group-prepend">
-                <span class="input-group-text">First name</span>
-              </div>
-              <InputText @bind-Value="client.Name" class="form-control" placeholder="John" />
+<div class="container-fluid">
+  <h2 class="ml-5 mt-5">@Title</h2>
+  <EditForm Model="@client" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <div class="card m-5">
+      <h5 class="card-header">Client Information</h5>
+
+      <div class="card-body">
+        <div class="form-row ml-3 mr-3 mb-3">
+          <div class="col input-group">
+            <div class="input-group-prepend">
+              <span class="input-group-text">First name</span>
             </div>
-
-            <div class="col input-group">
-              <div class="input-group-prepend">
-                <span class="input-group-text">Birthday</span>
-              </div>
-              <InputDate @bind-Value="client.Birthday" class="form-control" />
-            </div>
+            <InputText @bind-Value="client.Name" class="form-control" placeholder="John" />
           </div>
 
-          <div class="form-row m-3">
-            <div class="col input-group">
-              <div class="input-group-prepend">
-                <span class="input-group-text">Surname</span>
-              </div>
-              <InputText @bind-Value="client.Surname" class="form-control" placeholder="Smith" />
+          <div class="col input-group">
+            <div class="input-group-prepend">
+              <span class="input-group-text">Birthday</span>
             </div>
+            <InputDate @bind-Value="client.Birthday" class="form-control" />
+          </div>
+        </div>
 
-            <div class="col-6 input-group">
-              <span class="d-inline-flex align-items-center mr-3">Gender:</span>
-              <InputRadioGroup @bind-Value="client.Gender">
-                <div class="form-check form-check-inline">
-                  <InputRadio class="form-check-input" type="radio" id="inlineRadio1" Value="Gender.Male" />
-                  <label class="form-check-label" for="inlineRadio1">Male</label>
-                </div>
-                <div class="form-check form-check-inline">
-                  <InputRadio class="form-check-input" type="radio" id="inlineRadio1" Value="Gender.Female" />
-                  <label class="form-check-label" for="inlineRadio2">Female</label>
-                </div>
-              </InputRadioGroup>
+        <div class="form-row m-3">
+          <div class="col input-group">
+            <div class="input-group-prepend">
+              <span class="input-group-text">Surname</span>
             </div>
+            <InputText @bind-Value="client.Surname" class="form-control" placeholder="Smith" />
           </div>
 
-          <div class="form-row m-3">
-            <div class="col input-group">
-              <div class="input-group-prepend">
-                <span class="input-group-text">Patronymic</span>
+          <div class="col-6 input-group">
+            <span class="d-inline-flex align-items-center mr-3">Gender:</span>
+            <InputRadioGroup @bind-Value="client.Gender">
+              <div class="form-check form-check-inline">
+                <InputRadio class="form-check-input" type="radio" id="inlineRadio1" Value="Gender.Male" />
+                <label class="form-check-label" for="inlineRadio1">Male</label>
               </div>
-              <InputText @bind-Value="client.Patronymic" class="form-control" placeholder="Michael" />
-            </div>
+              <div class="form-check form-check-inline">
+                <InputRadio class="form-check-input" type="radio" id="inlineRadio1" Value="Gender.Female" />
+                <label class="form-check-label" for="inlineRadio2">Female</label>
+              </div>
+            </InputRadioGroup>
+          </div>
+        </div>
 
-            <div class="col input-group">
-              <div class="input-group-prepend">
-                <span class="input-group-text">Place of birth</span>
-              </div>
-              <InputText @bind-Value="client.BirthPlace" class="form-control" placeholder="Beaufort, North Carolina" />
+        <div class="form-row m-3">
+          <div class="col input-group">
+            <div class="input-group-prepend">
+              <span class="input-group-text">Patronymic</span>
             </div>
+            <InputText @bind-Value="client.Patronymic" class="form-control" placeholder="Michael" />
+          </div>
+
+          <div class="col input-group">
+            <div class="input-group-prepend">
+              <span class="input-group-text">Place of birth</span>
+            </div>
+            <InputText @bind-Value="client.BirthPlace" class="form-control" placeholder="Beaufort, North Carolina" />
           </div>
         </div>
       </div>
+    </div>
 
-      <div class="card m-5">
-        <h5 class="card-header">Contact Information</h5>
+    <div class="card m-5">
+      <h5 class="card-header">Contact Information</h5>
 
-        <div class="card-body">
-          <div class="form-row ml-3 mr-3 mb-3">
-            <div class="col input-group">
-              <div class="input-group-prepend">
-                @if (String.IsNullOrEmpty(client.ActualResidenceCity))
-                {
-                  <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    City of actual residence
-                  </button>
-                }
-                else
-                {
-                  <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    @client.ActualResidenceCity
-                  </button>
-                }
-                <div class="dropdown-menu">
-                  @foreach (var city in _actualResidenceCities)
-                  {
-                    <a class="dropdown-item" @onclick="@(() => client.ActualResidenceCity = city.Name)" @onclick:preventDefault>@city.Name</a>
-                  }
-
-                  <div role="separator" class="dropdown-divider"></div>
-                  <a class="dropdown-item" @onclick="@(() => client.ActualResidenceCity = null)" @onclick:preventDefault>NULL</a>
-                </div>
-              </div>
-              <input type="text" class="form-control" aria-label="Text input with dropdown button" placeholder="Enter city to filter..." @onfocusout="@(() => FilterActualResidenceCities())">
-            </div>
-
-            <div class="col input-group">
-              <div class="input-group-prepend">
-                <span class="input-group-text">Address of actual residence</span>
-              </div>
-              <InputText @bind-Value="client.ActualResidenceAddress" class="form-control" placeholder="3296 Fort Street" />
-            </div>
-          </div>
-
-          <div class="form-row m-3">
-            <div class="col input-group">
-              <div class="input-group-prepend">
-                @if (String.IsNullOrEmpty(client.RegistrationCity))
-                {
-                  <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    City of registration
-                  </button>
-                }
-                else
-                {
-                  <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    @client.RegistrationCity
-                  </button>
-                }
-                <div class="dropdown-menu">
-                  @foreach (var city in _registrationCities)
-                  {
-                    <a class="dropdown-item" @onclick="@(() => client.RegistrationCity = city.Name)" @onclick:preventDefault>@city.Name</a>
-                  }
-
-                  <div role="separator" class="dropdown-divider"></div>
-                  <a class="dropdown-item" @onclick="@(() => client.RegistrationCity = null)" @onclick:preventDefault>NULL</a>
-                </div>
-              </div>
-              <input type="text" class="form-control" aria-label="Text input with dropdown button" placeholder="Enter city to filter..." @onfocusout="@(() => FilterRegistrationCities())">
-            </div>
-
-            <div class="col input-group">
-              <div class="input-group-prepend">
-                <span class="input-group-text">Address of registration</span>
-              </div>
-              <InputText @bind-Value="client.RegistrationAddress" class="form-control" placeholder="3296 Fort Street" />
-            </div>
-          </div>
-
-          <div class="form-row m-3">
-            <div class="col input-group">
-              <div class="input-group-prepend">
-                <span class="input-group-text">HomePhoneNumber</span>
-              </div>
-              <InputText @bind-Value="client.HomePhoneNumber" class="form-control" placeholder="80xxxxxxxxxx" />
-            </div>
-
-            <div class="col input-group">
-              <div class="input-group-prepend">
-                <span class="input-group-text">Place of birth</span>
-              </div>
-              <InputText @bind-Value="client.MobilePhoneNumber" class="form-control" placeholder="+375xxxxxxxxx" />
-            </div>
-
-            <div class="col input-group">
-              <div class="input-group-prepend">
-                <span class="input-group-text">Email</span>
-              </div>
-              <InputText @bind-Value="client.Email" class="form-control" placeholder="@emailPlaceholder" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card m-5">
-        <h5 class="card-header">Passport Information</h5>
-
-        <div class="card-body">
-          <div class="form-row ml-3 mr-3 mb-3">
-            <div class="col input-group">
-              <div class="input-group-prepend">
-                <span class="input-group-text">Passport series</span>
-              </div>
-              <InputText @bind-Value="client.PassportSeries" class="form-control" placeholder="КН" />
-            </div>
-
-            <div class="col input-group">
-              <div class="input-group-prepend">
-                <span class="input-group-text">Passport number</span>
-              </div>
-              <InputText @bind-Value="client.PassportNumber" class="form-control" placeholder="1234567" />
-            </div>
-          </div>
-
-          <div class="form-row m-3">
-            <div class="col input-group">
-              <div class="input-group-prepend">
-                <span class="input-group-text">Passport issued by</span>
-              </div>
-              <InputText @bind-Value="client.PassportIssuedBy" class="form-control" placeholder="Baranochivsky ROVD, Brest region" />
-            </div>
-
-            <div class="col input-group">
-              <div class="input-group-prepend">
-                <span class="input-group-text">Passport issued date</span>
-              </div>
-              <InputDate @bind-Value="client.PassportIssuedDate" class="form-control" />
-            </div>
-          </div>
-
-          <div class="form-row m-3">
-            <div class="col input-group">
-              <div class="input-group-prepend">
-                <span class="input-group-text">Identification number</span>
-              </div>
-              <InputText @bind-Value="client.IdentificationNumber" class="form-control" placeholder="4131087B052PB4" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card m-5">
-        <h5 class="card-header">Additional Information</h5>
-
-        <div class="card-body">
-          <div class="form-row ml-3 mr-3 mb-3">
-            <div class="col input-group">
-              <div class="input-group-prepend">
-                <span class="input-group-text">Place of work</span>
-              </div>
-              <InputText @bind-Value="client.WorkPlace" class="form-control" placeholder="BSUIR" />
-            </div>
-
-            <div class="col input-group">
-              <div class="input-group-prepend">
-                <span class="input-group-text">Position</span>
-              </div>
-              <InputText @bind-Value="client.Position" class="form-control" placeholder="Proffessor of computer science" />
-            </div>
-          </div>
-
-          <div class="form-row m-3">
-            <div class="col-2 input-group">
-              @if (String.IsNullOrEmpty(client.RegistrationCity))
+      <div class="card-body">
+        <div class="form-row ml-3 mr-3 mb-3">
+          <div class="col input-group">
+            <div class="input-group-prepend">
+              @if (String.IsNullOrEmpty(client.ActualResidenceCityName))
               {
                 <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  Marital status
+                  City of actual residence
                 </button>
               }
               else
               {
                 <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  @client.MaritalStatus
+                  @client.ActualResidenceCityName
                 </button>
               }
               <div class="dropdown-menu">
-                @foreach (var maritalStatus in _maritalStatuses)
+                @foreach (var city in _actualResidenceCities)
                 {
-                  <a class="dropdown-item" @onclick="@(() => client.MaritalStatus = maritalStatus.Name)" @onclick:preventDefault>@maritalStatus.Name</a>
+                  <a class="dropdown-item" @onclick="@(() => client.ActualResidenceCityName = city.Name)" @onclick:preventDefault>@city.Name</a>
                 }
 
                 <div role="separator" class="dropdown-divider"></div>
-                <a class="dropdown-item" @onclick="@(() => client.MaritalStatus = null)" @onclick:preventDefault>NULL</a>
+                <a class="dropdown-item" @onclick="@(() => client.ActualResidenceCityName = null)" @onclick:preventDefault>NULL</a>
+              </div>
+            </div>
+            <div class="input-group-prepend">
+              <span class="input-group-text">Address of actual residence</span>
+            </div>
+            <InputText @bind-Value="client.ActualResidenceAddress" class="form-control" placeholder="3296 Fort Street" />
+          </div>
+        </div>
+
+        <div class="form-row m-3">
+          <div class="col input-group">
+            <div class="input-group-prepend">
+              @if (String.IsNullOrEmpty(client.RegistrationCityName))
+              {
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  City of registration
+                </button>
+              }
+              else
+              {
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  @client.RegistrationCityName
+                </button>
+              }
+              <div class="dropdown-menu">
+                @foreach (var city in _registrationCities)
+                {
+                  <a class="dropdown-item" @onclick="@(() => client.RegistrationCityName = city.Name)" @onclick:preventDefault>@city.Name</a>
+                }
+
+                <div role="separator" class="dropdown-divider"></div>
+                <a class="dropdown-item" @onclick="@(() => client.RegistrationCityName = null)" @onclick:preventDefault>NULL</a>
               </div>
             </div>
 
-            <div class="col-5 input-group">
-              <div class="input-group-prepend">
-                @if (String.IsNullOrEmpty(client.Nationality))
-                {
-                  <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Nationality
-                  </button>
-                }
-                else
-                {
-                  <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    @client.Nationality
-                  </button>
-                }
-                <div class="dropdown-menu">
-                  @foreach (var nationality in _nationalities)
-                  {
-                    <a class="dropdown-item" @onclick="@(() => client.Nationality = nationality.Name)" @onclick:preventDefault>@nationality.Name</a>
-                  }
-
-                  <div role="separator" class="dropdown-divider"></div>
-                  <a class="dropdown-item" @onclick="@(() => client.Nationality = null)" @onclick:preventDefault>NULL</a>
-                </div>
-              </div>
-              <input type="text" class="form-control" aria-label="Text input with dropdown button" placeholder="Enter nationality to filter..." @onfocusout="@(() => FilterNationalities())">
+            <div class="input-group-prepend">
+              <span class="input-group-text">Address of registration</span>
             </div>
+            <InputText @bind-Value="client.RegistrationAddress" class="form-control" placeholder="3296 Fort Street" />
+          </div>
+        </div>
 
-            <div class="col-5 input-group">
-              <div class="input-group-prepend">
-                @if (String.IsNullOrEmpty(client.Disability))
-                {
-                  <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Disability
-                  </button>
-                }
-                else
-                {
-                  <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    @client.Disability
-                  </button>
-                }
-                <div class="dropdown-menu">
-                  @foreach (var disability in _disabilities)
-                  {
-                    <a class="dropdown-item" @onclick="@(() => client.Disability = disability.Name)" @onclick:preventDefault>@disability.Name</a>
-                  }
-
-                  <div role="separator" class="dropdown-divider"></div>
-                  <a class="dropdown-item" @onclick="@(() => client.Disability = null)" @onclick:preventDefault>NULL</a>
-                </div>
-              </div>
-              <input type="text" class="form-control" aria-label="Text input with dropdown button" placeholder="Enter disability to filter..." @onfocusout="@(() => FilterDisabilities())">
+        <div class="form-row m-3">
+          <div class="col input-group">
+            <div class="input-group-prepend">
+              <span class="input-group-text">HomePhoneNumber</span>
             </div>
+            <InputText @bind-Value="client.HomePhoneNumber" class="form-control" placeholder="80xxxxxxxxxx" />
           </div>
 
-          <div class="form-row m-3">
-            <div class="col input-group">
-              <div class="input-group-prepend">
-                <span class="input-group-text">Monthly income</span>
-              </div>
-              <InputNumber @bind-Value="client.MonthlyIncome" class="form-control" placeholder="500" />
+          <div class="col input-group">
+            <div class="input-group-prepend">
+              <span class="input-group-text">Place of birth</span>
             </div>
+            <InputText @bind-Value="client.MobilePhoneNumber" class="form-control" placeholder="+375xxxxxxxxx" />
+          </div>
 
-            <div class="col-1 form-check form-check-inline ml-3">
-              <InputCheckbox class="form-check-input" type="checkbox" @bind-Value="client.Pensioner" id="defaultCheck1" />
-              <label class="form-check-label" for="defaultCheck1">
-                Pensioner
-              </label>
+          <div class="col input-group">
+            <div class="input-group-prepend">
+              <span class="input-group-text">Email</span>
             </div>
-            <div class="col-2 form-check form-check-inline">
-              <InputCheckbox class="form-check-input" type="checkbox" @bind-Value="client.LiableForMilitaryService" id="defaultCheck2" />
-              <label class="form-check-label" for="defaultCheck2">
-                Liable for military service
-              </label>
-            </div>
+            <InputText @bind-Value="client.Email" class="form-control" placeholder="@emailPlaceholder" />
           </div>
         </div>
       </div>
+    </div>
 
-      <ValidationSummary/>
+    <div class="card m-5">
+      <h5 class="card-header">Passport Information</h5>
 
-      <div class="d-flex justify-content-center">
-        <button class="btn btn-success btn-l btn-block mb-5 w-75" type="submit">Save Client</button>
+      <div class="card-body">
+        <div class="form-row ml-3 mr-3 mb-3">
+          <div class="col input-group">
+            <div class="input-group-prepend">
+              <span class="input-group-text">Passport series</span>
+            </div>
+            <InputText @bind-Value="client.PassportSeries" class="form-control" placeholder="КН" />
+          </div>
+
+          <div class="col input-group">
+            <div class="input-group-prepend">
+              <span class="input-group-text">Passport number</span>
+            </div>
+            <InputText @bind-Value="client.PassportNumber" class="form-control" placeholder="1234567" />
+          </div>
+        </div>
+
+        <div class="form-row m-3">
+          <div class="col input-group">
+            <div class="input-group-prepend">
+              <span class="input-group-text">Passport issued by</span>
+            </div>
+            <InputText @bind-Value="client.PassportIssuedBy" class="form-control" placeholder="Baranochivsky ROVD, Brest region" />
+          </div>
+
+          <div class="col input-group">
+            <div class="input-group-prepend">
+              <span class="input-group-text">Passport issued date</span>
+            </div>
+            <InputDate @bind-Value="client.PassportIssuedDate" class="form-control" />
+          </div>
+        </div>
+
+        <div class="form-row m-3">
+          <div class="col input-group">
+            <div class="input-group-prepend">
+              <span class="input-group-text">Identification number</span>
+            </div>
+            <InputText @bind-Value="client.IdentificationNumber" class="form-control" placeholder="4131087B052PB4" />
+          </div>
+        </div>
       </div>
-    </EditForm>
-  </div>
+    </div>
 
-  @code {
-      [Parameter]
-      public string ClientIDStr { get; set; }
+    <div class="card m-5">
+      <h5 class="card-header">Additional Information</h5>
 
-    private const string emailPlaceholder = @"example@gmail.com";
-    private string Title;
+      <div class="card-body">
+        <div class="form-row ml-3 mr-3 mb-3">
+          <div class="col input-group">
+            <div class="input-group-prepend">
+              <span class="input-group-text">Place of work</span>
+            </div>
+            <InputText @bind-Value="client.WorkPlace" class="form-control" placeholder="BSUIR" />
+          </div>
 
-    private ClientDto client = new ClientDto();
-    private IReadOnlyList<MaritalStatusDto> _registrationCities = new List<MaritalStatusDto>();
-    private IReadOnlyList<MaritalStatusDto> _actualResidenceCities = new List<MaritalStatusDto>();
-    private IReadOnlyList<MaritalStatusDto> _maritalStatuses = new List<MaritalStatusDto>();
-    private IReadOnlyList<MaritalStatusDto> _nationalities = new List<MaritalStatusDto>();
-    private IReadOnlyList<MaritalStatusDto> _disabilities = new List<MaritalStatusDto>();
+          <div class="col input-group">
+            <div class="input-group-prepend">
+              <span class="input-group-text">Position</span>
+            </div>
+            <InputText @bind-Value="client.Position" class="form-control" placeholder="Proffessor of computer science" />
+          </div>
+        </div>
 
-    protected override void OnParametersSet()
+        <div class="form-row m-3">
+          <div class="col input-group-prepend">
+            @if (String.IsNullOrEmpty(client.MaritalStatusName))
+            {
+              <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Marital status
+              </button>
+            }
+            else
+            {
+              <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                @client.MaritalStatusName
+              </button>
+            }
+            <div class="dropdown-menu">
+              @foreach (var maritalStatus in _maritalStatuses)
+              {
+                <a class="dropdown-item" @onclick="@(() => client.MaritalStatusName = maritalStatus.Name)" @onclick:preventDefault>@maritalStatus.Name</a>
+              }
+
+              <div role="separator" class="dropdown-divider"></div>
+              <a class="dropdown-item" @onclick="@(() => client.MaritalStatusName = null)" @onclick:preventDefault>NULL</a>
+            </div>
+            @*</div>
+
+            <div class="col-5 input-group">*@
+            <div class="input-group-prepend ml-2 mr-2">
+              @if (String.IsNullOrEmpty(client.NationalityName))
+              {
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  Nationality
+                </button>
+              }
+              else
+              {
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  @client.NationalityName
+                </button>
+              }
+              <div class="dropdown-menu">
+                @foreach (var nationality in _nationalities)
+                {
+                  <a class="dropdown-item" @onclick="@(() => client.NationalityName = nationality.Name)" @onclick:preventDefault>@nationality.Name</a>
+                }
+
+                <div role="separator" class="dropdown-divider"></div>
+                <a class="dropdown-item" @onclick="@(() => client.NationalityName = null)" @onclick:preventDefault>NULL</a>
+              </div>
+            </div>
+            <input type="text" class="form-control" aria-label="Text input with dropdown button" placeholder="Enter nationality to filter..." @onfocusout="@(() => FilterNationalities())" hidden>
+            @*</div>
+
+            <div class="col-5 input-group">*@
+            <div class="input-group-prepend">
+              @if (String.IsNullOrEmpty(client.DisabilityName))
+              {
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  Disability
+                </button>
+              }
+              else
+              {
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  @client.DisabilityName
+                </button>
+              }
+              <div class="dropdown-menu">
+                @foreach (var disability in _disabilities)
+                {
+                  <a class="dropdown-item" @onclick="@(() => client.DisabilityName = disability.Name)" @onclick:preventDefault>@disability.Name</a>
+                }
+
+                <div role="separator" class="dropdown-divider"></div>
+                <a class="dropdown-item" @onclick="@(() => client.DisabilityName = null)" @onclick:preventDefault>NULL</a>
+              </div>
+            </div>
+            <input type="text" class="form-control" aria-label="Text input with dropdown button" placeholder="Enter disability to filter..." @onfocusout="@(() => FilterDisabilities())" hidden>
+          </div>
+        </div>
+
+        <div class="form-row m-3">
+          <div class="col input-group">
+            <div class="input-group-prepend">
+              <span class="input-group-text">Monthly income</span>
+            </div>
+            <InputNumber @bind-Value="client.MonthlyIncome" class="form-control" placeholder="500" />
+            <div class="input-group-append">
+              <span class="input-group-text">BYR</span>
+            </div>
+          </div>
+
+          <div class="col-1 form-check form-check-inline ml-3">
+            <InputCheckbox class="form-check-input" type="checkbox" @bind-Value="client.Pensioner" id="defaultCheck1" />
+            <label class="form-check-label" for="defaultCheck1">
+              Pensioner
+            </label>
+          </div>
+          <div class="col-2 form-check form-check-inline">
+            <InputCheckbox class="form-check-input" type="checkbox" @bind-Value="client.LiableForMilitaryService" id="defaultCheck2" />
+            <label class="form-check-label" for="defaultCheck2">
+              Liable for military service
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    @if (!Result.Success)
     {
-      // Or client doesnt exist
-      Title = String.IsNullOrEmpty(ClientIDStr)
-        ? @"Add new Client"
-        : @"Edit Client";
+      <div class="alert alert-danger" role="alert">
+        @Result.Message
+      </div>
     }
 
+    <ValidationSummary />
 
-    protected override async Task OnInitializedAsync()
+    <div class="d-flex justify-content-center">
+      <button class="btn btn-success btn-l btn-block mb-5 w-75" type="submit">Save</button>
+    </div>
+  </EditForm>
+</div>
+
+@code {
+  [Parameter]
+  public Guid? ClientID { get; set; }
+
+  private bool IsNewClient => !ClientID.HasValue;
+
+  private const string emailPlaceholder = @"example@gmail.com";
+  private string Title;
+
+  private ResultDto Result = new ResultDto { Success = true };
+
+  private ClientDto client = new ClientDto();
+  private IReadOnlyList<CityDto> _registrationCities = new List<CityDto>();
+  private IReadOnlyList<CityDto> _actualResidenceCities = new List<CityDto>();
+  private IReadOnlyList<MaritalStatusDto> _maritalStatuses = new List<MaritalStatusDto>();
+  private IReadOnlyList<NationalityDto> _nationalities = new List<NationalityDto>();
+  private IReadOnlyList<DisabilityDto> _disabilities = new List<DisabilityDto>();
+
+  protected override async Task OnParametersSetAsync()
+  {
+    if (IsNewClient)
     {
-      _registrationCities = (await maritalStatusesService.GetMaritalStatusesAsync()).ToList();
+      Title = @"Add new Client";
 
+      client.Birthday = DateTime.Today;
+      client.PassportIssuedDate = DateTime.Today;
+    }
+    else
+    {
+      var accuredClient = await clientsService.GetClientAsync(ClientID.Value);
 
-      await base.OnInitializedAsync();
+      if (accuredClient is not null)
+      {
+        client = accuredClient;
+        Title = @"Edit Client";
+      }
+      else
+      {
+        // TODO redirect to 404
+        throw new Exception($"Client with ID: {ClientID} Not Found");
+      }
     }
 
-    private void FilterRegistrationCities()
-    { }
-
-    private void FilterActualResidenceCities()
-    { }
-
-    private void FilterNationalities()
-    { }
-
-    private void FilterDisabilities()
-    { }
+    await base.OnParametersSetAsync();
   }
+
+  protected override async Task OnInitializedAsync()
+  {
+    _maritalStatuses = (await maritalStatusesService.GetMaritalStatusesAsync()).ToList();
+    _registrationCities = (await citiesService.GetCitiesAsync()).ToList();
+    _actualResidenceCities = _registrationCities;
+
+    _disabilities = (await disabilitiesService.GetDisabilitiesAsync()).ToList();
+    _nationalities = (await nationalitiesService.GetNationalitiesAsync()).ToList();
+
+
+    await base.OnInitializedAsync();
+  }
+
+  private async Task HandleValidSubmit()
+  {
+    ResultDto result = IsNewClient
+      ? await clientsService.CreateClient(client)
+      : await clientsService.UpdateClient(ClientID.Value, client);
+
+    Result = result;
+  }
+
+  #region NotImplemented
+  private void FilterRegistrationCities()
+  { }
+
+  private void FilterActualResidenceCities()
+  { }
+
+  private void FilterNationalities()
+  { }
+
+  private void FilterDisabilities()
+  { }
+  #endregion
+}
