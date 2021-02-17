@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PIRIS_labs.Data;
 
 namespace PIRIS_labs.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210217202810_DepositEntitiesMigration")]
+    partial class DepositEntitiesMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -71,36 +73,6 @@ namespace PIRIS_labs.Migrations
                     b.HasKey("ID");
 
                     b.ToTable("AccountPlans");
-
-                    b.HasData(
-                        new
-                        {
-                            ID = new Guid("adcaecb8-86f8-4ef3-a57a-6ca703c28daa"),
-                            AccountName = "Passive account for Individuals",
-                            AccountNumber = "3014",
-                            AccountType = 1
-                        },
-                        new
-                        {
-                            ID = new Guid("e89271c8-a70d-40b2-b07e-e844cd02ab95"),
-                            AccountName = "Active account for Entities",
-                            AccountNumber = "2400",
-                            AccountType = 0
-                        },
-                        new
-                        {
-                            ID = new Guid("cc3aecab-f513-4d27-b7ff-265923741884"),
-                            AccountName = "Bank cash desk account",
-                            AccountNumber = "1010",
-                            AccountType = 0
-                        },
-                        new
-                        {
-                            ID = new Guid("babf196b-1f70-4377-9275-adb49b200cc3"),
-                            AccountName = "Bank Development Fund account",
-                            AccountNumber = "7327",
-                            AccountType = 1
-                        });
                 });
 
             modelBuilder.Entity("PIRIS_labs.Data.Entities.City", b =>
@@ -372,48 +344,6 @@ namespace PIRIS_labs.Migrations
                     b.HasIndex("PercentAccountPlanID");
 
                     b.ToTable("DepositPlans");
-
-                    b.HasData(
-                        new
-                        {
-                            ID = new Guid("be9ac5eb-fe7a-4388-9d25-687531f431eb"),
-                            DayPeriod = 20,
-                            MainAccountPlanID = new Guid("adcaecb8-86f8-4ef3-a57a-6ca703c28daa"),
-                            Name = "Standard",
-                            Percent = 0.01m,
-                            PercentAccountPlanID = new Guid("adcaecb8-86f8-4ef3-a57a-6ca703c28daa"),
-                            Revocable = true
-                        },
-                        new
-                        {
-                            ID = new Guid("bce0f9c6-fc36-4ac6-a52d-f9103a3de885"),
-                            DayPeriod = 40,
-                            MainAccountPlanID = new Guid("adcaecb8-86f8-4ef3-a57a-6ca703c28daa"),
-                            Name = "Standard+",
-                            Percent = 0.05m,
-                            PercentAccountPlanID = new Guid("adcaecb8-86f8-4ef3-a57a-6ca703c28daa"),
-                            Revocable = false
-                        },
-                        new
-                        {
-                            ID = new Guid("5ef7958f-a759-4206-9786-f2c0dcbc9304"),
-                            DayPeriod = 100,
-                            MainAccountPlanID = new Guid("adcaecb8-86f8-4ef3-a57a-6ca703c28daa"),
-                            Name = "Medium",
-                            Percent = 0.1m,
-                            PercentAccountPlanID = new Guid("adcaecb8-86f8-4ef3-a57a-6ca703c28daa"),
-                            Revocable = false
-                        },
-                        new
-                        {
-                            ID = new Guid("5321574e-16f1-4b70-945a-66b650ed661b"),
-                            DayPeriod = 220,
-                            MainAccountPlanID = new Guid("adcaecb8-86f8-4ef3-a57a-6ca703c28daa"),
-                            Name = "Ultra",
-                            Percent = 0.4m,
-                            PercentAccountPlanID = new Guid("adcaecb8-86f8-4ef3-a57a-6ca703c28daa"),
-                            Revocable = true
-                        });
                 });
 
             modelBuilder.Entity("PIRIS_labs.Data.Entities.Disability", b =>
