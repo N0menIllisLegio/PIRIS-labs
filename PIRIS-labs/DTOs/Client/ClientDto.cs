@@ -9,10 +9,13 @@ namespace PIRIS_labs.DTOs.Client
   {
     public Guid ID { get; set; }
     [Required]
+    [RegularExpression(@"^[A-Za-zА-Яа-я]{1,30}$", ErrorMessage = "Surname should only consist of letters.")]
     public string Surname { get; set; }
     [Required]
+    [RegularExpression(@"^[A-Za-zА-Яа-я]{1,30}$", ErrorMessage = "Name should only consist of letters.")]
     public string Name { get; set; }
     [Required]
+    [RegularExpression(@"^[A-Za-zА-Яа-я]{1,30}$", ErrorMessage = "Patronymic should only consist of letters.")]
     public string Patronymic { get; set; }
     [Required]
     [Birthday]
@@ -38,6 +41,7 @@ namespace PIRIS_labs.DTOs.Client
     public string Email { get; set; }
 
     [Required]
+    [RegularExpression(@"^[A-Z]{2}$", ErrorMessage = "Invalid passport series.")]
     public string PassportSeries { get; set; }
     [Required]
     [RegularExpression(@"^[0-9]{7}$", ErrorMessage = "Invalid passport number.")]
