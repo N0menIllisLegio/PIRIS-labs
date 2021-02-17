@@ -23,7 +23,7 @@ namespace PIRIS_labs.Services
 
     public async Task<IEnumerable<ClientDto>> GetClientsAsync()
     {
-      var clients = await _unitOfWork.Clients.GetAllAsync();
+      var clients = await _unitOfWork.Clients.GetClientSurnameOrderedAsync();
       return clients.Select(_mapper.Map<ClientDto>);
     }
 
