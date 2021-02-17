@@ -37,6 +37,7 @@ namespace PIRIS_labs
       services.AddScoped<DisabilitiesService>();
       services.AddScoped<NationalitiesService>();
       services.AddScoped<MaritalStatusesService>();
+      services.AddScoped<DepositPlansService>();
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

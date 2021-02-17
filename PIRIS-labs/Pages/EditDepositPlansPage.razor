@@ -1,0 +1,81 @@
+﻿@page "/deposit-plan/edit"
+
+@using Services
+@using DTOs.Deposit
+@inject DepositPlansService depositPlansService
+@inject NavigationManager NavigationManager
+
+<div class="container-fluid">
+  <EditForm Model="@_depositPlanDto" class="card m-5" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <div class="card-header">Add Deposit Plan</div>
+    <div class="card-body">
+      <div class="form-row ml-3 mr-3 mb-3">
+        <div class="col input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text">Deposit Plan Name</span>
+          </div>
+          <InputText @bind-Value="_depositPlanDto.Name" class="form-control" />
+        </div>
+      </div>
+      <div class="form-row ml-3 mr-3 mb-3">
+        <div class="col input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text">Period</span>
+          </div>
+          <InputNumber @bind-Value="_depositPlanDto.DayPeriod" class="form-control" />
+          <div class="input-group-append">
+            <span class="input-group-text">days</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-row ml-3 mr-3 mb-3">
+        <div class="col input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text">Percent a year</span>
+          </div>
+          <InputNumber @bind-Value="_depositPlanDto.Percent" class="form-control" />
+          <div class="input-group-append">
+            <span class="input-group-text">%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <ValidationSummary />
+
+    <div class="form-row ml-3 mr-3">
+      <button class="btn btn-success btn-l btn-block mb-5" type="submit">
+        @if (Spinner)
+        {
+          <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" />
+        }
+        Save
+      </button>
+    </div>
+  </EditForm>
+</div>
+
+@code
+{
+  private DepositPlanDto _depositPlanDto = new DepositPlanDto();
+  private bool Spinner = false;
+
+  private async Task HandleValidSubmit()
+  {
+    Spinner = true;
+
+    var result = await depositPlansService.CreateDepositPlanAsync(_depositPlanDto);
+
+    Spinner = false;
+
+    if (result.Success)
+    {
+      NavigationManager.NavigateTo("/deposit-plans");
+    }
+    else
+    {
+      // Result = result;
+    }
+  }
+}

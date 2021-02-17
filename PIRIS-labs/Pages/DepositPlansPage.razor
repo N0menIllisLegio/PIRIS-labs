@@ -1,0 +1,74 @@
+﻿@page "/deposit-plans"
+
+@using Services
+@using DTOs.Deposit
+@inject DepositPlansService depositPlansService
+@inject NavigationManager NavigationManager
+
+<div class="container-fluid">
+  <h1 class="m-5">Deposit Plans</h1>
+
+  <div class="d-flex justify-content-end fixed-bottom">
+    <NavLink class="btn-lg btn-success m-5 p-3" href="@link" Match="NavLinkMatch.All">
+      Add new plan
+    </NavLink>
+  </div>
+
+  <div>
+    @if (_depositPlans is not null && _depositPlans.Count > 0)
+    {
+      <table class="table table-bordered table-hover">
+        <thead class="thead-dark">
+          <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Time</th>
+            <th scope="col">Percent a year</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @foreach (var depositPlan in _depositPlans)
+          {
+          <tr class="pointerCursor">
+            <th scope="row">@depositPlan.Name</th>
+            <td>@depositPlan.DayPeriod days</td>
+            <td>@depositPlan.Percent %</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    }
+    else if (_depositPlans is null)
+    {
+      <div class="d-flex justify-content-center m-5">
+        <div class="spinner-border" role="status">
+          <span class="sr-only">Loading...</span>
+        </div>
+      </div>
+    }
+    else
+    {
+      <blockquote class="blockquote m-5">
+        <p class="mb-0">There are no deposit plans here.</p>
+        <footer class="blockquote-footer"><cite>Add first</cite></footer>
+      </blockquote>
+    }
+  </div>
+</div>
+
+@code
+{
+  private IReadOnlyList<DepositPlanDto> _depositPlans;
+  private string link = $"/deposit-plan/edit";
+
+  protected override async Task OnInitializedAsync()
+  {
+    await RefreshClientsTable();
+    await base.OnInitializedAsync();
+  }
+
+  private async Task RefreshClientsTable()
+  {
+    _depositPlans = await depositPlansService.GetDepositPlansAsync();
+  }
+}
