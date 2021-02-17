@@ -15,7 +15,7 @@
   </div>
 
   <div>
-    @if (_clients is not null)
+    @if (_clients is not null && _clients.Count > 0)
     {
       <table class="table table-bordered table-hover">
         <thead class="thead-dark">
@@ -33,46 +33,61 @@
         <tbody>
           @foreach (var client in _clients)
           {
-          <tr class="pointerCursor">
-            <th scope="row" @onclick="@(() => EditClient(client.ID))">@client.IdentificationNumber</th>
-            <td @onclick="@(() => EditClient(client.ID))">@client.Name</td>
-            <td @onclick="@(() => EditClient(client.ID))">@client.Surname</td>
-            <td @onclick="@(() => EditClient(client.ID))">@client.Patronymic</td>
-            <td @onclick="@(() => EditClient(client.ID))">@client.Birthday.ToShortDateString()</td>
-            <td @onclick="@(() => EditClient(client.ID))">@client.Gender</td>
-            <td @onclick="@(() => DeleteClient(client.ID))" class="bg-danger"><span class="oi oi-trash"/></td>
-          </tr>
+            <tr class="pointerCursor">
+              <th scope="row" @onclick="@(() => EditClient(client.ID))">@client.IdentificationNumber</th>
+              <td @onclick="@(() => EditClient(client.ID))">@client.Name</td>
+              <td @onclick="@(() => EditClient(client.ID))">@client.Surname</td>
+              <td @onclick="@(() => EditClient(client.ID))">@client.Patronymic</td>
+              <td @onclick="@(() => EditClient(client.ID))">@client.Birthday.ToShortDateString()</td>
+              <td @onclick="@(() => EditClient(client.ID))">@client.Gender</td>
+              <td @onclick="@(() => DeleteClient(client.ID))" class="bg-danger"><span class="oi oi-trash" /></td>
+            </tr>
           }
         </tbody>
       </table>
     }
+    else if (_clients is null)
+    {
+      <div class="d-flex justify-content-center m-5">
+        <div class="spinner-border" role="status">
+          <span class="sr-only">Loading...</span>
+        </div>
+      </div>
+    }
+    else
+    {
+      <blockquote class="blockquote m-5">
+        <p class="mb-0">There are no clients here.</p>
+        <footer class="blockquote-footer"><cite>Add first</cite></footer>
+      </blockquote>
+    }
   </div>
 </div>
 
-  @code
+@code
 {
-    private IReadOnlyList<ClientDto> _clients;
-    private string link = $"/client/edit";
+  private IReadOnlyList<ClientDto> _clients;
+  private string link = $"/client/edit";
 
-    protected override async Task OnInitializedAsync()
-    {
-      await RefreshClientsTable();
-      await base.OnInitializedAsync();
-    }
-
-    private async Task RefreshClientsTable()
-    {
-      _clients = (await clientsService.GetClientsAsync()).ToList();
-    }
-
-    private void EditClient(Guid clientID)
-    {
-      NavigationManager.NavigateTo($"/client/edit/{clientID}");
-    }
-
-    private async Task DeleteClient(Guid clientID)
-    {
-      await clientsService.DeleteClient(clientID);
-      await RefreshClientsTable();
-    }
+  protected override async Task OnInitializedAsync()
+  {
+    await RefreshClientsTable();
+    await base.OnInitializedAsync();
   }
+
+  private async Task RefreshClientsTable()
+  {
+    _clients = (await clientsService.GetClientsAsync()).ToList();
+  }
+
+  private void EditClient(Guid clientID)
+  {
+    NavigationManager.NavigateTo($"/client/edit/{clientID}");
+  }
+
+  private async Task DeleteClient(Guid clientID)
+  {
+    await clientsService.DeleteClient(clientID);
+    await RefreshClientsTable();
+  }
+}
