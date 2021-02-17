@@ -1,11 +1,14 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 using PIRIS_labs.Enums;
 using PIRIS_labs.Helpers;
 
 namespace PIRIS_labs.Data.Entities
 {
+  [Index(nameof(IdentificationNumber), IsUnique = true, Name = "IX_Clients_IdentificationNumber")]
+  [Index(nameof(PassportSeries), nameof(PassportNumber), IsUnique = true, Name = "IX_Clients_PassportSeries_PassportNumber")]
   public class Client: IEntity
   {
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

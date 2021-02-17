@@ -36,22 +36,6 @@ namespace PIRIS_labs.Migrations
                         },
                         new
                         {
-                            Name = "Qexpolis"
-                        },
-                        new
-                        {
-                            Name = "Ijefbridge"
-                        },
-                        new
-                        {
-                            Name = "Zhexson"
-                        },
-                        new
-                        {
-                            Name = "Dekdale"
-                        },
-                        new
-                        {
                             Name = "Purgh"
                         },
                         new
@@ -64,107 +48,11 @@ namespace PIRIS_labs.Migrations
                         },
                         new
                         {
-                            Name = "Andville"
-                        },
-                        new
-                        {
-                            Name = "Enslens"
-                        },
-                        new
-                        {
-                            Name = "Bruusginia"
-                        },
-                        new
-                        {
-                            Name = "Vluddon"
-                        },
-                        new
-                        {
-                            Name = "Cluebridge"
-                        },
-                        new
-                        {
                             Name = "Besding"
                         },
                         new
                         {
                             Name = "Keedlas"
-                        },
-                        new
-                        {
-                            Name = "Plando"
-                        },
-                        new
-                        {
-                            Name = "Breka"
-                        },
-                        new
-                        {
-                            Name = "Bison"
-                        },
-                        new
-                        {
-                            Name = "Andsas"
-                        },
-                        new
-                        {
-                            Name = "Encedon"
-                        },
-                        new
-                        {
-                            Name = "Shixrith"
-                        },
-                        new
-                        {
-                            Name = "Justin"
-                        },
-                        new
-                        {
-                            Name = "Flufield"
-                        },
-                        new
-                        {
-                            Name = "Zheanford"
-                        },
-                        new
-                        {
-                            Name = "Graepding"
-                        },
-                        new
-                        {
-                            Name = "Osheles"
-                        },
-                        new
-                        {
-                            Name = "Ephoni"
-                        },
-                        new
-                        {
-                            Name = "Streah"
-                        },
-                        new
-                        {
-                            Name = "Ingdence"
-                        },
-                        new
-                        {
-                            Name = "Amport"
-                        },
-                        new
-                        {
-                            Name = "Mucaster"
-                        },
-                        new
-                        {
-                            Name = "Shagas"
-                        },
-                        new
-                        {
-                            Name = "Qribert"
-                        },
-                        new
-                        {
-                            Name = "Khetmore"
                         },
                         new
                         {
@@ -204,6 +92,7 @@ namespace PIRIS_labs.Migrations
                         .HasColumnType("nvarchar(250)");
 
                     b.Property<string>("ActualResidenceCityName")
+                        .IsRequired()
                         .HasColumnType("nvarchar(250)");
 
                     b.Property<string>("BirthPlace")
@@ -215,6 +104,7 @@ namespace PIRIS_labs.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("DisabilityName")
+                        .IsRequired()
                         .HasColumnType("nvarchar(250)");
 
                     b.Property<string>("Email")
@@ -237,6 +127,7 @@ namespace PIRIS_labs.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("MaritalStatusName")
+                        .IsRequired()
                         .HasColumnType("nvarchar(250)");
 
                     b.Property<string>("MobilePhoneNumber")
@@ -252,6 +143,7 @@ namespace PIRIS_labs.Migrations
                         .HasColumnType("nvarchar(250)");
 
                     b.Property<string>("NationalityName")
+                        .IsRequired()
                         .HasColumnType("nvarchar(250)");
 
                     b.Property<string>("PassportIssuedBy")
@@ -290,6 +182,7 @@ namespace PIRIS_labs.Migrations
                         .HasColumnType("nvarchar(250)");
 
                     b.Property<string>("RegistrationCityName")
+                        .IsRequired()
                         .HasColumnType("nvarchar(250)");
 
                     b.Property<string>("Surname")
@@ -313,6 +206,12 @@ namespace PIRIS_labs.Migrations
 
                     b.HasIndex("RegistrationCityName");
 
+                    b.HasIndex(new[] { "IdentificationNumber" }, "IX_Clients_IdentificationNumber")
+                        .IsUnique();
+
+                    b.HasIndex(new[] { "PassportSeries", "PassportNumber" }, "IX_Clients_PassportSeries_PassportNumber")
+                        .IsUnique();
+
                     b.ToTable("Clients");
                 });
 
@@ -327,6 +226,10 @@ namespace PIRIS_labs.Migrations
                     b.ToTable("Disabilities");
 
                     b.HasData(
+                        new
+                        {
+                            Name = "None"
+                        },
                         new
                         {
                             Name = "Musculoskeletal System"
@@ -435,67 +338,7 @@ namespace PIRIS_labs.Migrations
                     b.HasData(
                         new
                         {
-                            Name = "Afghan"
-                        },
-                        new
-                        {
-                            Name = "Albanian"
-                        },
-                        new
-                        {
-                            Name = "Algerian"
-                        },
-                        new
-                        {
-                            Name = "American"
-                        },
-                        new
-                        {
-                            Name = "Andorran"
-                        },
-                        new
-                        {
-                            Name = "Angolan"
-                        },
-                        new
-                        {
-                            Name = "Anguillan"
-                        },
-                        new
-                        {
-                            Name = "Argentine"
-                        },
-                        new
-                        {
-                            Name = "Armenian"
-                        },
-                        new
-                        {
-                            Name = "Australian"
-                        },
-                        new
-                        {
                             Name = "Austrian"
-                        },
-                        new
-                        {
-                            Name = "Azerbaijani"
-                        },
-                        new
-                        {
-                            Name = "Bahamian"
-                        },
-                        new
-                        {
-                            Name = "Bahraini"
-                        },
-                        new
-                        {
-                            Name = "Bangladeshi"
-                        },
-                        new
-                        {
-                            Name = "Barbadian"
                         },
                         new
                         {
@@ -503,255 +346,11 @@ namespace PIRIS_labs.Migrations
                         },
                         new
                         {
-                            Name = "Belgian"
-                        },
-                        new
-                        {
-                            Name = "Belizean"
-                        },
-                        new
-                        {
-                            Name = "Beninese"
-                        },
-                        new
-                        {
-                            Name = "Bermudian"
-                        },
-                        new
-                        {
-                            Name = "Bhutanese"
-                        },
-                        new
-                        {
-                            Name = "Bolivian"
-                        },
-                        new
-                        {
-                            Name = "Botswanan"
-                        },
-                        new
-                        {
-                            Name = "Brazilian"
-                        },
-                        new
-                        {
-                            Name = "British"
-                        },
-                        new
-                        {
-                            Name = "British Virgin Islander"
-                        },
-                        new
-                        {
-                            Name = "Bruneian"
-                        },
-                        new
-                        {
-                            Name = "Bulgarian"
-                        },
-                        new
-                        {
-                            Name = "Burkinan"
-                        },
-                        new
-                        {
-                            Name = "Burmese"
-                        },
-                        new
-                        {
-                            Name = "Burundian"
-                        },
-                        new
-                        {
-                            Name = "Cambodian"
-                        },
-                        new
-                        {
-                            Name = "Cameroonian"
-                        },
-                        new
-                        {
-                            Name = "Canadian"
-                        },
-                        new
-                        {
-                            Name = "Cape Verdean"
-                        },
-                        new
-                        {
-                            Name = "Cayman Islander"
-                        },
-                        new
-                        {
-                            Name = "Central African"
-                        },
-                        new
-                        {
-                            Name = "Chadian"
-                        },
-                        new
-                        {
-                            Name = "Chilean"
-                        },
-                        new
-                        {
-                            Name = "Chinese"
-                        },
-                        new
-                        {
-                            Name = "Citizen of Antigua and Barbuda"
-                        },
-                        new
-                        {
-                            Name = "Citizen of Bosnia and Herzegovina"
-                        },
-                        new
-                        {
-                            Name = "Citizen of Guinea-Bissau"
-                        },
-                        new
-                        {
-                            Name = "Citizen of Kiribati"
-                        },
-                        new
-                        {
-                            Name = "Citizen of Seychelles"
-                        },
-                        new
-                        {
-                            Name = "Citizen of the Dominican Republic"
-                        },
-                        new
-                        {
-                            Name = "Citizen of Vanuatu"
-                        },
-                        new
-                        {
-                            Name = "Colombian"
-                        },
-                        new
-                        {
-                            Name = "Comoran"
-                        },
-                        new
-                        {
-                            Name = "Congolese (Congo)"
-                        },
-                        new
-                        {
-                            Name = "Congolese (DRC)"
-                        },
-                        new
-                        {
-                            Name = "Cook Islander"
-                        },
-                        new
-                        {
-                            Name = "Costa Rican"
-                        },
-                        new
-                        {
-                            Name = "Croatian"
-                        },
-                        new
-                        {
-                            Name = "Cuban"
-                        },
-                        new
-                        {
-                            Name = "Cymraes"
-                        },
-                        new
-                        {
-                            Name = "Cymro"
-                        },
-                        new
-                        {
-                            Name = "Cypriot"
-                        },
-                        new
-                        {
                             Name = "Czech"
                         },
                         new
                         {
-                            Name = "Danish"
-                        },
-                        new
-                        {
-                            Name = "Djiboutian"
-                        },
-                        new
-                        {
-                            Name = "Dominican"
-                        },
-                        new
-                        {
-                            Name = "Dutch"
-                        },
-                        new
-                        {
-                            Name = "East Timorese"
-                        },
-                        new
-                        {
-                            Name = "Ecuadorean"
-                        },
-                        new
-                        {
-                            Name = "Egyptian"
-                        },
-                        new
-                        {
-                            Name = "Emirati"
-                        },
-                        new
-                        {
-                            Name = "English"
-                        },
-                        new
-                        {
-                            Name = "Equatorial Guinean"
-                        },
-                        new
-                        {
-                            Name = "Eritrean"
-                        },
-                        new
-                        {
-                            Name = "Estonian"
-                        },
-                        new
-                        {
-                            Name = "Ethiopian"
-                        },
-                        new
-                        {
-                            Name = "Faroese"
-                        },
-                        new
-                        {
-                            Name = "Fijian"
-                        },
-                        new
-                        {
-                            Name = "Filipino"
-                        },
-                        new
-                        {
-                            Name = "Finnish"
-                        },
-                        new
-                        {
                             Name = "French"
-                        },
-                        new
-                        {
-                            Name = "Gabonese"
-                        },
-                        new
-                        {
-                            Name = "Gambian"
                         },
                         new
                         {
@@ -763,95 +362,7 @@ namespace PIRIS_labs.Migrations
                         },
                         new
                         {
-                            Name = "Ghanaian"
-                        },
-                        new
-                        {
-                            Name = "Gibraltarian"
-                        },
-                        new
-                        {
                             Name = "Greek"
-                        },
-                        new
-                        {
-                            Name = "Greenlandic"
-                        },
-                        new
-                        {
-                            Name = "Grenadian"
-                        },
-                        new
-                        {
-                            Name = "Guamanian"
-                        },
-                        new
-                        {
-                            Name = "Guatemalan"
-                        },
-                        new
-                        {
-                            Name = "Guinean"
-                        },
-                        new
-                        {
-                            Name = "Guyanese"
-                        },
-                        new
-                        {
-                            Name = "Haitian"
-                        },
-                        new
-                        {
-                            Name = "Honduran"
-                        },
-                        new
-                        {
-                            Name = "Hong Konger"
-                        },
-                        new
-                        {
-                            Name = "Hungarian"
-                        },
-                        new
-                        {
-                            Name = "Icelandic"
-                        },
-                        new
-                        {
-                            Name = "Indian"
-                        },
-                        new
-                        {
-                            Name = "Indonesian"
-                        },
-                        new
-                        {
-                            Name = "Iranian"
-                        },
-                        new
-                        {
-                            Name = "Iraqi"
-                        },
-                        new
-                        {
-                            Name = "Irish"
-                        },
-                        new
-                        {
-                            Name = "Israeli"
-                        },
-                        new
-                        {
-                            Name = "Italian"
-                        },
-                        new
-                        {
-                            Name = "Ivorian"
-                        },
-                        new
-                        {
-                            Name = "Jamaican"
                         },
                         new
                         {
@@ -859,191 +370,7 @@ namespace PIRIS_labs.Migrations
                         },
                         new
                         {
-                            Name = "Jordanian"
-                        },
-                        new
-                        {
-                            Name = "Kazakh"
-                        },
-                        new
-                        {
-                            Name = "Kenyan"
-                        },
-                        new
-                        {
-                            Name = "Kittitian"
-                        },
-                        new
-                        {
-                            Name = "Kosovan"
-                        },
-                        new
-                        {
-                            Name = "Kuwaiti"
-                        },
-                        new
-                        {
-                            Name = "Kyrgyz"
-                        },
-                        new
-                        {
-                            Name = "Lao"
-                        },
-                        new
-                        {
-                            Name = "Latvian"
-                        },
-                        new
-                        {
-                            Name = "Lebanese"
-                        },
-                        new
-                        {
-                            Name = "Liberian"
-                        },
-                        new
-                        {
-                            Name = "Libyan"
-                        },
-                        new
-                        {
                             Name = "Liechtenstein citizen"
-                        },
-                        new
-                        {
-                            Name = "Lithuanian"
-                        },
-                        new
-                        {
-                            Name = "Luxembourger"
-                        },
-                        new
-                        {
-                            Name = "Macanese"
-                        },
-                        new
-                        {
-                            Name = "Macedonian"
-                        },
-                        new
-                        {
-                            Name = "Malagasy"
-                        },
-                        new
-                        {
-                            Name = "Malawian"
-                        },
-                        new
-                        {
-                            Name = "Malaysian"
-                        },
-                        new
-                        {
-                            Name = "Maldivian"
-                        },
-                        new
-                        {
-                            Name = "Malian"
-                        },
-                        new
-                        {
-                            Name = "Maltese"
-                        },
-                        new
-                        {
-                            Name = "Marshallese"
-                        },
-                        new
-                        {
-                            Name = "Martiniquais"
-                        },
-                        new
-                        {
-                            Name = "Mauritanian"
-                        },
-                        new
-                        {
-                            Name = "Mauritian"
-                        },
-                        new
-                        {
-                            Name = "Mexican"
-                        },
-                        new
-                        {
-                            Name = "Micronesian"
-                        },
-                        new
-                        {
-                            Name = "Moldovan"
-                        },
-                        new
-                        {
-                            Name = "Monegasque"
-                        },
-                        new
-                        {
-                            Name = "Mongolian"
-                        },
-                        new
-                        {
-                            Name = "Montenegrin"
-                        },
-                        new
-                        {
-                            Name = "Montserratian"
-                        },
-                        new
-                        {
-                            Name = "Moroccan"
-                        },
-                        new
-                        {
-                            Name = "Mosotho"
-                        },
-                        new
-                        {
-                            Name = "Mozambican"
-                        },
-                        new
-                        {
-                            Name = "Namibian"
-                        },
-                        new
-                        {
-                            Name = "Nauruan"
-                        },
-                        new
-                        {
-                            Name = "Nepalese"
-                        },
-                        new
-                        {
-                            Name = "New Zealander"
-                        },
-                        new
-                        {
-                            Name = "Nicaraguan"
-                        },
-                        new
-                        {
-                            Name = "Nigerian"
-                        },
-                        new
-                        {
-                            Name = "Nigerien"
-                        },
-                        new
-                        {
-                            Name = "Niuean"
-                        },
-                        new
-                        {
-                            Name = "North Korean"
-                        },
-                        new
-                        {
-                            Name = "Northern Irish"
                         },
                         new
                         {
@@ -1051,171 +378,11 @@ namespace PIRIS_labs.Migrations
                         },
                         new
                         {
-                            Name = "Omani"
-                        },
-                        new
-                        {
-                            Name = "Pakistani"
-                        },
-                        new
-                        {
-                            Name = "Palauan"
-                        },
-                        new
-                        {
-                            Name = "Palestinian"
-                        },
-                        new
-                        {
-                            Name = "Panamanian"
-                        },
-                        new
-                        {
-                            Name = "Papua New Guinean"
-                        },
-                        new
-                        {
-                            Name = "Paraguayan"
-                        },
-                        new
-                        {
-                            Name = "Peruvian"
-                        },
-                        new
-                        {
-                            Name = "Pitcairn Islander"
-                        },
-                        new
-                        {
                             Name = "Polish"
                         },
                         new
                         {
-                            Name = "Portuguese"
-                        },
-                        new
-                        {
-                            Name = "Prydeinig"
-                        },
-                        new
-                        {
-                            Name = "Puerto Rican"
-                        },
-                        new
-                        {
-                            Name = "Qatari"
-                        },
-                        new
-                        {
-                            Name = "Romanian"
-                        },
-                        new
-                        {
-                            Name = "Russian"
-                        },
-                        new
-                        {
-                            Name = "Rwandan"
-                        },
-                        new
-                        {
-                            Name = "Salvadorean"
-                        },
-                        new
-                        {
-                            Name = "Sammarinese"
-                        },
-                        new
-                        {
-                            Name = "Samoan"
-                        },
-                        new
-                        {
-                            Name = "Sao Tomean"
-                        },
-                        new
-                        {
-                            Name = "Saudi Arabian"
-                        },
-                        new
-                        {
                             Name = "Scottish"
-                        },
-                        new
-                        {
-                            Name = "Senegalese"
-                        },
-                        new
-                        {
-                            Name = "Serbian"
-                        },
-                        new
-                        {
-                            Name = "Sierra Leonean"
-                        },
-                        new
-                        {
-                            Name = "Singaporean"
-                        },
-                        new
-                        {
-                            Name = "Slovak"
-                        },
-                        new
-                        {
-                            Name = "Slovenian"
-                        },
-                        new
-                        {
-                            Name = "Solomon Islander"
-                        },
-                        new
-                        {
-                            Name = "Somali"
-                        },
-                        new
-                        {
-                            Name = "South African"
-                        },
-                        new
-                        {
-                            Name = "South Korean"
-                        },
-                        new
-                        {
-                            Name = "South Sudanese"
-                        },
-                        new
-                        {
-                            Name = "Spanish"
-                        },
-                        new
-                        {
-                            Name = "Sri Lankan"
-                        },
-                        new
-                        {
-                            Name = "St Helenian"
-                        },
-                        new
-                        {
-                            Name = "St Lucian"
-                        },
-                        new
-                        {
-                            Name = "Stateless"
-                        },
-                        new
-                        {
-                            Name = "Sudanese"
-                        },
-                        new
-                        {
-                            Name = "Surinamese"
-                        },
-                        new
-                        {
-                            Name = "Swazi"
                         },
                         new
                         {
@@ -1227,75 +394,11 @@ namespace PIRIS_labs.Migrations
                         },
                         new
                         {
-                            Name = "Syrian"
-                        },
-                        new
-                        {
-                            Name = "Taiwanese"
-                        },
-                        new
-                        {
-                            Name = "Tajik"
-                        },
-                        new
-                        {
-                            Name = "Tanzanian"
-                        },
-                        new
-                        {
-                            Name = "Thai"
-                        },
-                        new
-                        {
-                            Name = "Togolese"
-                        },
-                        new
-                        {
-                            Name = "Tongan"
-                        },
-                        new
-                        {
-                            Name = "Trinidadian"
-                        },
-                        new
-                        {
-                            Name = "Tristanian"
-                        },
-                        new
-                        {
-                            Name = "Tunisian"
-                        },
-                        new
-                        {
                             Name = "Turkish"
                         },
                         new
                         {
-                            Name = "Turkmen"
-                        },
-                        new
-                        {
-                            Name = "Turks and Caicos Islander"
-                        },
-                        new
-                        {
-                            Name = "Tuvaluan"
-                        },
-                        new
-                        {
                             Name = "Ugandan"
-                        },
-                        new
-                        {
-                            Name = "Ukrainian"
-                        },
-                        new
-                        {
-                            Name = "Uruguayan"
-                        },
-                        new
-                        {
-                            Name = "Uzbek"
                         },
                         new
                         {
@@ -1307,31 +410,7 @@ namespace PIRIS_labs.Migrations
                         },
                         new
                         {
-                            Name = "Vietnamese"
-                        },
-                        new
-                        {
-                            Name = "Vincentian"
-                        },
-                        new
-                        {
-                            Name = "Wallisian"
-                        },
-                        new
-                        {
                             Name = "Welsh"
-                        },
-                        new
-                        {
-                            Name = "Yemeni"
-                        },
-                        new
-                        {
-                            Name = "Zambian"
-                        },
-                        new
-                        {
-                            Name = "Zimbabwean"
                         });
                 });
 
@@ -1339,23 +418,33 @@ namespace PIRIS_labs.Migrations
                 {
                     b.HasOne("PIRIS_labs.Data.Entities.City", "ActualResidenceCity")
                         .WithMany()
-                        .HasForeignKey("ActualResidenceCityName");
+                        .HasForeignKey("ActualResidenceCityName")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("PIRIS_labs.Data.Entities.Disability", "Disability")
                         .WithMany()
-                        .HasForeignKey("DisabilityName");
+                        .HasForeignKey("DisabilityName")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("PIRIS_labs.Data.Entities.MaritalStatus", "MaritalStatus")
                         .WithMany()
-                        .HasForeignKey("MaritalStatusName");
+                        .HasForeignKey("MaritalStatusName")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("PIRIS_labs.Data.Entities.Nationality", "Nationality")
                         .WithMany()
-                        .HasForeignKey("NationalityName");
+                        .HasForeignKey("NationalityName")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("PIRIS_labs.Data.Entities.City", "RegistrationCity")
                         .WithMany()
-                        .HasForeignKey("RegistrationCityName");
+                        .HasForeignKey("RegistrationCityName")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("ActualResidenceCity");
 
