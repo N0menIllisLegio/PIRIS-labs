@@ -1,5 +1,11 @@
 ﻿@page "/"
+@inject NavigationManager NavigationManager
 
-<h1>Hello, world!</h1>
-
-Welcome to your new app.
+@code
+{ 
+  protected override void OnInitialized()
+  {
+    NavigationManager.NavigateTo("/clients");
+    base.OnInitialized();
+  }
+}
