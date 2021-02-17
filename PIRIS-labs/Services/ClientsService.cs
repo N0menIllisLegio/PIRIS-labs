@@ -63,6 +63,13 @@ namespace PIRIS_labs.Services
       return new ResultDto { Success = true };
     }
 
+    public async Task DeleteClient(Guid clientID)
+    {
+      var dbclient = await _unitOfWork.Clients.FindAsync(clientID);
+      _unitOfWork.Clients.Remove(dbclient);
+      await _unitOfWork.SaveAsync();
+    }
+
     private async Task<bool> CheckUniqueness(ClientDto client, Guid? id = null)
     {
       var foundClient = await _unitOfWork.Clients.GetFirstWhereAsync(dbclient =>

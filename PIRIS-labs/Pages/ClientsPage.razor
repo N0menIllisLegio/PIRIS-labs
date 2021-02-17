@@ -1,38 +1,78 @@
 ﻿@page "/clients"
 
 @using Services
-@using DTOs.MaritalStatus
-@inject MaritalStatusesService maritalStatusesService
+@using DTOs.Client
+@inject ClientsService clientsService
+@inject NavigationManager NavigationManager
 
-<h1>Clients</h1>
+<div class="container-fluid">
+  <h1 class="m-5">Clients</h1>
 
-<NavLink class="btn btn-success" href="@link" Match="NavLinkMatch.All">
-  Add new client
-</NavLink>
+  <div class="d-flex justify-content-end fixed-bottom">
+    <NavLink class="btn-lg btn-success m-5 p-3" href="@link" Match="NavLinkMatch.All">
+      Add new client
+    </NavLink>
+  </div>
 
-@if (_maritalStatuses is not null)
+  <div>
+    @if (_clients is not null)
+    {
+      <table class="table table-bordered table-hover">
+        <thead class="thead-dark">
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Name</th>
+            <th scope="col">Surname</th>
+            <th scope="col">Patronymic</th>
+            <th scope="col">Birthday</th>
+            <th scope="col">Gender</th>
+            <th scope="col">Delete</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @foreach (var client in _clients)
+          {
+          <tr class="pointerCursor">
+            <th scope="row" @onclick="@(() => EditClient(client.ID))">@client.IdentificationNumber</th>
+            <td @onclick="@(() => EditClient(client.ID))">@client.Name</td>
+            <td @onclick="@(() => EditClient(client.ID))">@client.Surname</td>
+            <td @onclick="@(() => EditClient(client.ID))">@client.Patronymic</td>
+            <td @onclick="@(() => EditClient(client.ID))">@client.Birthday.ToShortDateString()</td>
+            <td @onclick="@(() => EditClient(client.ID))">@client.Gender</td>
+            <td @onclick="@(() => DeleteClient(client.ID))" class="bg-danger"><span class="oi oi-trash"/></td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+</div>
+
+  @code
 {
-  @foreach (var maritalStatus in _maritalStatuses)
-  {
-    <div>@maritalStatus.Name</div>
-    <br />
+    private IReadOnlyList<ClientDto> _clients;
+    private string link = $"/client/edit";
+
+    protected override async Task OnInitializedAsync()
+    {
+      await RefreshClientsTable();
+      await base.OnInitializedAsync();
+    }
+
+    private async Task RefreshClientsTable()
+    {
+      _clients = (await clientsService.GetClientsAsync()).ToList();
+    }
+
+    private void EditClient(Guid clientID)
+    {
+      NavigationManager.NavigateTo($"/client/edit/{clientID}");
+    }
+
+    private async Task DeleteClient(Guid clientID)
+    {
+      await clientsService.DeleteClient(clientID);
+      await RefreshClientsTable();
+    }
   }
-
-}
-else
-{
-  <div>Fuck</div>
-}
-
-@code
-{
-  private IReadOnlyList<MaritalStatusDto> _maritalStatuses;
-  private string link = $"/client/edit";///{Guid.NewGuid()}";
-
-  protected override async Task OnInitializedAsync()
-  {
-    _maritalStatuses = (await maritalStatusesService.GetMaritalStatusesAsync()).ToList();
-
-    await base.OnInitializedAsync();
-  }
-}

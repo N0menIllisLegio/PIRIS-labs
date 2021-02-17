@@ -7,6 +7,7 @@ namespace PIRIS_labs.DTOs.Client
 {
   public class ClientDto
   {
+    public Guid ID { get; set; }
     [Required]
     public string Surname { get; set; }
     [Required]
