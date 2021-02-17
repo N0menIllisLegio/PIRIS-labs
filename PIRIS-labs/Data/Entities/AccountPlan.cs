@@ -6,7 +6,7 @@ using PIRIS_labs.Enums;
 
 namespace PIRIS_labs.Data.Entities
 {
-  public class AccountPlan
+  public class AccountPlan: IEntity
   {
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public Guid ID { get; set; }

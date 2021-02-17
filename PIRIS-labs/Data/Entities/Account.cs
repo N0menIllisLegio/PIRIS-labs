@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PIRIS_labs.Data.Entities
 {
-  public class Account
+  public class Account: IEntity
   {
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public Guid ID { get; set; }
@@ -19,6 +19,7 @@ namespace PIRIS_labs.Data.Entities
     public decimal Balance { get; set; }
 
     public Guid AccountPlanID { get; set; }
+
     [Required]
     public virtual AccountPlan AccountPlan { get; set; }
 
