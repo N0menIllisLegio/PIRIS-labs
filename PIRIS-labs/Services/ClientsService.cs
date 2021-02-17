@@ -73,7 +73,8 @@ namespace PIRIS_labs.Services
     private async Task<bool> CheckUniqueness(ClientDto client, Guid? id = null)
     {
       var foundClient = await _unitOfWork.Clients.GetFirstWhereAsync(dbclient =>
-        (!id.HasValue || dbclient.ID != id.Value) && dbclient.IdentificationNumber == client.IdentificationNumber);
+        (!id.HasValue || dbclient.ID != id.Value) && (dbclient.IdentificationNumber == client.IdentificationNumber
+          || (dbclient.PassportSeries == client.PassportSeries && dbclient.PassportNumber == client.PassportNumber)));
 
       return foundClient is null;
     }
