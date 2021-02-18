@@ -1,0 +1,127 @@
+﻿@page "/deposit/edit"
+
+@using Services
+@using DTOs.Deposit
+@using DTOs.Client
+@inject ClientsService clientsService
+@inject DepositPlansService depositPlansService
+@inject DepositsService depositsService
+@inject NavigationManager NavigationManager
+
+<div class="container-fluid">
+  <EditForm Model="@_createDeposit" class="card m-5" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+
+    <h3 class="card-header">Add Deposit</h3>
+    <div class="card-body">
+
+      <div class="form-row ml-3 mr-3 mb-3">
+        <div class="col input-group">
+          @if (_createDeposit.ClientID == Guid.Empty)
+          {
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Clients
+            </button>
+          }
+          else
+          {
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              @_clients.First(client => client.ID == _createDeposit.ClientID)
+            </button>
+          }
+          <div class="dropdown-menu">
+            @foreach (var client in _clients)
+            {
+              <a class="dropdown-item" @onclick="@(() => _createDeposit.ClientID = client.ID)" @onclick:preventDefault>@client.Surname @client.Name @client.Patronymic</a>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row ml-3 mr-3 mb-3">
+        <div class="col input-group">
+          @if (_createDeposit.DepositPlanID == Guid.Empty)
+          {
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Deposit Plans
+            </button>
+          }
+          else
+          {
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              @_depositPlans.First(plan => plan.ID == _createDeposit.DepositPlanID)
+            </button>
+          }
+          <div class="dropdown-menu">
+            @foreach (var plan in _depositPlans)
+            {
+              <a class="dropdown-item" @onclick="@(() => _createDeposit.DepositPlanID = plan.ID)" @onclick:preventDefault>@plan</a>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row ml-3 mr-3 mb-3">
+        <div class="col input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text">Deposit Amount</span>
+          </div>
+          <InputNumber @bind-Value="_createDeposit.Amount" class="form-control" />
+          <div class="input-group-append">
+            <span class="input-group-text">BYR</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <ValidationSummary />
+
+    <div class="form-row ml-3 mr-3 mb-3">
+      <button class="btn btn-success btn-l btn-block" type="submit">
+        @if (Spinner)
+        {
+          <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" />
+        }
+        Save
+      </button>
+    </div>
+  </EditForm>
+</div>
+
+@code
+{
+  private IReadOnlyList<ClientDto> _clients = new List<ClientDto>();
+  private IReadOnlyList<DepositPlanDto> _depositPlans = new List<DepositPlanDto>();
+  private CreateDepositDto _createDeposit = new CreateDepositDto();
+  private bool Spinner = false;
+
+  protected override async Task OnInitializedAsync()
+  {
+    Spinner = true;
+
+    _clients = (await clientsService.GetClientsAsync()).ToList();
+    _depositPlans = await depositPlansService.GetDepositPlansAsync();
+
+    Spinner = false;
+
+    await base.OnInitializedAsync();
+  }
+
+  private async Task HandleValidSubmit()
+  {
+    //Spinner = true;
+
+    //var result = await depositPlansService.CreateDepositPlanAsync(_depositPlanDto);
+
+    //Spinner = false;
+
+    //if (result.Success)
+    //{
+    //  NavigationManager.NavigateTo("/deposit-plans");
+    //}
+    //else
+    //{
+    //  // Result = result;
+    //}
+  }
+}

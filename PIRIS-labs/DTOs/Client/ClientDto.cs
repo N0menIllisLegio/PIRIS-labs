@@ -71,5 +71,10 @@ namespace PIRIS_labs.DTOs.Client
     public bool Pensioner { get; set; }
     [Required]
     public bool LiableForMilitaryService { get; set; }
+
+    public override string ToString()
+    {
+      return $"{Surname} {Name} {Patronymic}";
+    }
   }
 }

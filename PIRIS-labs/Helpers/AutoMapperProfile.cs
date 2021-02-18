@@ -19,6 +19,10 @@ namespace PIRIS_labs.Helpers
       CreateMap<MaritalStatus, MaritalStatusDto>();
       CreateMap<Nationality, NationalityDto>();
       CreateMap<DepositPlan, DepositPlanDto>().ReverseMap();
+      CreateMap<Deposit, DepositDto>()
+        .ForMember(dest => dest.DepositPlan, opt => opt.MapFrom(src => src.DepositPlan.Name))
+        .ForMember(dest => dest.Client, opt => opt.MapFrom(src => $"{src.Client.Surname} {src.Client.Name} {src.Client.Patronymic}"))
+        .ForMember(dest => dest.AccumulatedAmount, opt => opt.MapFrom(src => src.PercentAccount.Balance));
     }
   }
 }
