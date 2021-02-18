@@ -26,6 +26,7 @@
             <th scope="col">Patronymic</th>
             <th scope="col">Birthday</th>
             <th scope="col">Gender</th>
+            <th scope="col">Edit</th>
             <th scope="col">Delete</th>
           </tr>
         </thead>
@@ -34,12 +35,13 @@
           @foreach (var client in _clients)
           {
             <tr class="pointerCursor">
-              <th scope="row" @onclick="@(() => EditClient(client.ID))">@client.IdentificationNumber</th>
-              <td @onclick="@(() => EditClient(client.ID))">@client.Name</td>
-              <td @onclick="@(() => EditClient(client.ID))">@client.Surname</td>
-              <td @onclick="@(() => EditClient(client.ID))">@client.Patronymic</td>
-              <td @onclick="@(() => EditClient(client.ID))">@client.Birthday.ToShortDateString()</td>
-              <td @onclick="@(() => EditClient(client.ID))">@client.Gender</td>
+              <th scope="row" @onclick="@(() => DisplayClientInfo(client.ID))">@client.IdentificationNumber</th>
+              <td @onclick="@(() => DisplayClientInfo(client.ID))">@client.Name</td>
+              <td @onclick="@(() => DisplayClientInfo(client.ID))">@client.Surname</td>
+              <td @onclick="@(() => DisplayClientInfo(client.ID))">@client.Patronymic</td>
+              <td @onclick="@(() => DisplayClientInfo(client.ID))">@client.Birthday.ToShortDateString()</td>
+              <td @onclick="@(() => DisplayClientInfo(client.ID))">@client.Gender</td>
+              <td @onclick="@(() => EditClient(client.ID))" class="bg-warning"><span class="oi oi-pencil" /></td>
               <td @onclick="@(() => DeleteClient(client.ID))" class="bg-danger"><span class="oi oi-trash" /></td>
             </tr>
           }
@@ -78,6 +80,11 @@
   private async Task RefreshClientsTable()
   {
     _clients = (await clientsService.GetClientsAsync()).ToList();
+  }
+
+  private void DisplayClientInfo(Guid clientID)
+  {
+    NavigationManager.NavigateTo($"/client/{clientID}");
   }
 
   private void EditClient(Guid clientID)

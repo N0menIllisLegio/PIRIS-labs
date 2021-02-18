@@ -16,6 +16,17 @@ a:hover {
   cursor: pointer;
 }
 
+.clientInfoStyle {
+  margin-bottom: 0;
+  border: 1px solid;
+  border-width: 0px 0px 0px 1px;
+  border-color: lightgray;
+}
+
+a:hover {
+  text-decoration: none;
+}
+
 .btn-primary {
   color: #fff;
   background-color: #1b6ec2;
