@@ -2,10 +2,10 @@
 @inject NavigationManager NavigationManager
 
 @code
-{ 
-  protected override void OnInitialized()
+{
+  protected override void OnAfterRender(bool firstRender)
   {
     NavigationManager.NavigateTo("/clients");
-    base.OnInitialized();
+    base.OnAfterRender(firstRender);
   }
 }
