@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -23,7 +22,7 @@ namespace PIRIS_labs.Services
 
     public async Task<List<DepositPlanDto>> GetDepositPlansAsync()
     {
-      var plans = await _unitOfWork.DepositPlans.GetAllAsync();
+      var plans = await _unitOfWork.DepositPlans.GetDepositPlansOrderedAsync();
 
       return plans.Select(_mapper.Map<DepositPlanDto>).ToList();
     }
@@ -31,11 +30,6 @@ namespace PIRIS_labs.Services
     public async Task<ResultDto> CreateDepositPlanAsync(DepositPlanDto depositPlanDto)
     {
       var depositPlan = _mapper.Map<DepositPlan>(depositPlanDto);
-
-      var account = await _unitOfWork.AccountPlans.FindAsync(Guid.Parse("ADCAECB8-86F8-4EF3-A57A-6CA703C28DAA"));
-
-      //depositPlan.mainaccountplan = account;
-      //depositplan.percentaccountplan = account;
 
       _unitOfWork.DepositPlans.Add(depositPlan);
 
