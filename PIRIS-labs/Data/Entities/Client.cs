@@ -14,6 +14,9 @@ namespace PIRIS_labs.Data.Entities
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public Guid ID { get; set; }
 
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int Number { get; set; }
+
     [Required]
     [MaxLength(250)]
     [ExpressionsBuilder]
@@ -40,6 +43,7 @@ namespace PIRIS_labs.Data.Entities
     public string BirthPlace { get; set; }
 
     public string ActualResidenceCityName { get; set; }
+
     [Required]
     public virtual City ActualResidenceCity { get; set; }
 
@@ -60,6 +64,7 @@ namespace PIRIS_labs.Data.Entities
     public string Position { get; set; }
 
     public string RegistrationCityName { get; set; }
+
     [Required]
     public virtual City RegistrationCity { get; set; }
 
@@ -71,14 +76,17 @@ namespace PIRIS_labs.Data.Entities
     public string RegistrationAddress { get; set; }
 
     public string MaritalStatusName { get; set; }
+
     [Required]
     public virtual MaritalStatus MaritalStatus { get; set; }
 
     public string NationalityName { get; set; }
+
     [Required]
     public virtual Nationality Nationality { get; set; }
 
     public string DisabilityName { get; set; }
+
     [Required]
     public virtual Disability Disability { get; set; }
 
