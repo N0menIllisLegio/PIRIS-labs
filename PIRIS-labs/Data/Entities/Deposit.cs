@@ -15,18 +15,22 @@ namespace PIRIS_labs.Data.Entities
 
     [Required]
     public virtual Account MainAccount { get; set; }
+
     public string MainAccountNumber { get; set; }
 
     [Required]
     public virtual Account PercentAccount { get; set; }
+
     public string PercentAccountNumber { get; set; }
 
     [Required]
     public virtual Client Client { get; set; }
+
     public Guid ClientID { get; set; }
 
     [Required]
     public virtual DepositPlan DepositPlan { get; set; }
+
     public Guid DepositPlanID { get; set; }
   }
 }
