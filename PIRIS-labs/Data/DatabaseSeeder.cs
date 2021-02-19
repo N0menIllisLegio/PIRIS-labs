@@ -14,23 +14,22 @@ namespace PIRIS_labs.Data
       SeedMaritalStatuses(builder.Entity<MaritalStatus>());
       SeedNationalities(builder.Entity<Nationality>());
       SeedDisabilities(builder.Entity<Disability>());
-      SeedAccountAndDepositPlans(builder.Entity<AccountPlan>(), builder.Entity<DepositPlan>());
+      SeedAccountAndDeposit(builder);
     }
 
     public static void SeedCities(EntityTypeBuilder<City> cityBuilder)
     {
-      cityBuilder.HasData(new City { Name = "Yerpolis" });
-      cityBuilder.HasData(new City { Name = "Purgh" });
-      cityBuilder.HasData(new City { Name = "Jine" });
-      cityBuilder.HasData(new City { Name = "Fleim" });
-      cityBuilder.HasData(new City { Name = "Besding" });
-      cityBuilder.HasData(new City { Name = "Keedlas" });
-      cityBuilder.HasData(new City { Name = "Dorough" });
-      cityBuilder.HasData(new City { Name = "Stranta" });
-      cityBuilder.HasData(new City { Name = "Jeka" });
-      cityBuilder.HasData(new City { Name = "Qesa" });
-      cityBuilder.HasData(new City { Name = "Olislas" });
-      cityBuilder.HasData(new City { Name = "Icofield" });
+      cityBuilder.HasData(new City { Name = "Vienna" });
+      cityBuilder.HasData(new City { Name = "Zürich" });
+      cityBuilder.HasData(new City { Name = "Vancouver" });
+      cityBuilder.HasData(new City { Name = "Munich" });
+      cityBuilder.HasData(new City { Name = "Auckland" });
+      cityBuilder.HasData(new City { Name = "Düsseldorf" });
+      cityBuilder.HasData(new City { Name = "Frankfurt" });
+      cityBuilder.HasData(new City { Name = "Copenhagen" });
+      cityBuilder.HasData(new City { Name = "Geneva" });
+      cityBuilder.HasData(new City { Name = "Basel" });
+      cityBuilder.HasData(new City { Name = "Sydney" });
     }
 
     public static void SeedMaritalStatuses(EntityTypeBuilder<MaritalStatus> maritalStatusBuilder)
@@ -69,34 +68,63 @@ namespace PIRIS_labs.Data
     public static void SeedDisabilities(EntityTypeBuilder<Disability> disabilityBuilder)
     {
       disabilityBuilder.HasData(new Disability { Name = "None" });
-      disabilityBuilder.HasData(new Disability { Name = "Musculoskeletal System" });
-      disabilityBuilder.HasData(new Disability { Name = "Special Senses and Speech" });
-      disabilityBuilder.HasData(new Disability { Name = "Respiratory Disorders" });
-      disabilityBuilder.HasData(new Disability { Name = "Cardiovascular System" });
-      disabilityBuilder.HasData(new Disability { Name = "Digestive System" });
-      disabilityBuilder.HasData(new Disability { Name = "Genitourinary Disorders" });
-      disabilityBuilder.HasData(new Disability { Name = "Hematological Disorders" });
-      disabilityBuilder.HasData(new Disability { Name = "Skin Disorders" });
-      disabilityBuilder.HasData(new Disability { Name = "Endocrine Disorders" });
-      disabilityBuilder.HasData(new Disability { Name = "Congenital Disorders that Affect Multiple Body Systems" });
-      disabilityBuilder.HasData(new Disability { Name = "Neurological Disorders" });
-      disabilityBuilder.HasData(new Disability { Name = "Mental Disorders" });
-      disabilityBuilder.HasData(new Disability { Name = "Cancer (Malignant Neoplastic Diseases)" });
-      disabilityBuilder.HasData(new Disability { Name = "Immune System Disorders" });
+      disabilityBuilder.HasData(new Disability { Name = "Grade 1" });
+      disabilityBuilder.HasData(new Disability { Name = "Grade 2" });
+      disabilityBuilder.HasData(new Disability { Name = "Grade 3" });
     }
 
-    public static void SeedAccountAndDepositPlans(EntityTypeBuilder<AccountPlan> accountPlanBuilder, EntityTypeBuilder<DepositPlan> depositPlanBuilder)
+    public static void SeedAccountAndDeposit(ModelBuilder builder)
     {
-      var accountPlan = new AccountPlan { ID = Guid.NewGuid(), AccountName = "Passive account for Individuals", AccountNumber = "3014", AccountType = AccountType.Passive };
-      accountPlanBuilder.HasData(accountPlan);
-      accountPlanBuilder.HasData(new AccountPlan { ID = Guid.NewGuid(), AccountName = "Active account for Entities", AccountNumber = "2400", AccountType = AccountType.Active });
-      accountPlanBuilder.HasData(new AccountPlan { ID = Guid.NewGuid(), AccountName = "Bank cash desk account", AccountNumber = "1010", AccountType = AccountType.Active });
-      accountPlanBuilder.HasData(new AccountPlan { ID = Guid.NewGuid(), AccountName = "Bank Development Fund account", AccountNumber = "7327", AccountType = AccountType.Passive });
+      var accountPlanBuilder = builder.Entity<AccountPlan>();
+      var depositPlanBuilder = builder.Entity<DepositPlan>();
 
-      depositPlanBuilder.HasData(new DepositPlan { ID = Guid.NewGuid(), Name = "Standard", DayPeriod = 20, Percent = 0.01m, Revocable = true, MainAccountPlanID = accountPlan.ID, PercentAccountPlanID = accountPlan.ID });
-      depositPlanBuilder.HasData(new DepositPlan { ID = Guid.NewGuid(), Name = "Standard+", DayPeriod = 40, Percent = 0.05m, Revocable = false, MainAccountPlanID = accountPlan.ID, PercentAccountPlanID = accountPlan.ID });
-      depositPlanBuilder.HasData(new DepositPlan { ID = Guid.NewGuid(), Name = "Medium", DayPeriod = 100, Percent = 0.1m, Revocable = false, MainAccountPlanID = accountPlan.ID, PercentAccountPlanID = accountPlan.ID });
-      depositPlanBuilder.HasData(new DepositPlan { ID = Guid.NewGuid(), Name = "Ultra", DayPeriod = 220, Percent = 0.4m, Revocable = true, MainAccountPlanID = accountPlan.ID, PercentAccountPlanID = accountPlan.ID });
+      var accountPlan = new AccountPlan { Number = "7327", Name = "Bank Development Fund account", Type = AccountType.Passive };
+      accountPlanBuilder.HasData(new AccountPlan { Number = "3014", Name = "Passive account for Individuals", Type = AccountType.Passive });
+      accountPlanBuilder.HasData(new AccountPlan { Number = "2400", Name = "Active account for Individuals", Type = AccountType.Active });
+      accountPlanBuilder.HasData(new AccountPlan { Number = "1010", Name = "Bank cashbox account", Type = AccountType.Active });
+      accountPlanBuilder.HasData(accountPlan);
+
+      var bankOwner = new Client
+      {
+        ID = Guid.Parse("627DE68A-7C1E-4983-9345-61351783B9E7"),
+        Surname = "Tifa",
+        Name = "Lockhart",
+        Patronymic = "Rokkuhāto",
+        Birthday = new DateTime(1987, 5, 3),
+        Gender = Gender.Female,
+        BirthPlace = "Nibelheim",
+        ActualResidenceCityName = "Vienna",
+        ActualResidenceAddress = "Praterstrasse 72",
+        WorkPlace = "Bank",
+        Position = "Chief Financial Officer",
+        RegistrationCityName = "Vienna",
+        RegistrationAddress = "Praterstrasse 72",
+        MaritalStatusName = "Single",
+        NationalityName = "Austrian",
+        DisabilityName = "None",
+        Pensioner = false,
+        LiableForMilitaryService = true,
+        PassportSeries = "DD",
+        PassportNumber = "0926088",
+        PassportIssuedBy = "Österreichische Staatsdruckerei",
+        PassportIssuedDate = new DateTime(2003, 4, 16),
+        IdentificationNumber = "8463627K730PB2",
+      };
+
+      builder.Entity<Client>().HasData(bankOwner);
+      builder.Entity<Account>().HasData(new Account
+      {
+        AccountPlanNumber = accountPlan.Number,
+        Number = $"{accountPlan.Number}000010017",
+        OwnerID = bankOwner.ID,
+        CreditValue = 1_000_000_000,
+        Balance = 1_000_000_000
+      });
+
+      depositPlanBuilder.HasData(new DepositPlan { ID = Guid.Parse("D8FFAF98-6DCB-4310-A76D-39D0A2B7ED48"), Name = "Standard", DayPeriod = 20, Percent = 0.01m, Revocable = true });
+      depositPlanBuilder.HasData(new DepositPlan { ID = Guid.Parse("979F2C2E-F263-43B3-ACA6-800FA0A3668F"), Name = "Standard+", DayPeriod = 40, Percent = 0.05m, Revocable = false });
+      depositPlanBuilder.HasData(new DepositPlan { ID = Guid.Parse("464FE5A5-1621-4078-9258-CC6D9BCA5147"), Name = "Medium", DayPeriod = 100, Percent = 0.1m, Revocable = false });
+      depositPlanBuilder.HasData(new DepositPlan { ID = Guid.Parse("5125376B-1FB8-4E1D-80EE-DF7A5504CF9B"), Name = "Ultra", DayPeriod = 220, Percent = 0.4m, Revocable = true });
     }
   }
 }

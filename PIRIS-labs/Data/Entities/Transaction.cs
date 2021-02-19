@@ -12,14 +12,12 @@ namespace PIRIS_labs.Data.Entities
     public decimal Amount { get; set; }
     public DateTime TransactionDay { get; set; }
 
-    public Guid DebetAccountID { get; set; }
+    [Required]
+    public virtual Account TransferToAccount { get; set; }
+    public string TransferToAccountNumber { get; set; }
 
     [Required]
-    public virtual Account DebitAccount { get; set; }
-
-    public Guid CreditAccountID { get; set; }
-
-    [Required]
-    public virtual Account CreditAccount { get; set; }
+    public virtual Account TransferFromAccount { get; set; }
+    public string TransferFromAccountNumber { get; set; }
   }
 }

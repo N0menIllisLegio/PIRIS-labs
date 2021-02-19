@@ -42,8 +42,14 @@ namespace PIRIS_labs
       services.AddScoped<AccountsService>();
     }
 
-    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceScopeFactory serviceScopeFactory)
     {
+      using (var scope = serviceScopeFactory.CreateScope())
+      {
+        var appDbContext = scope.ServiceProvider.GetService<ApplicationDbContext>();
+        appDbContext.Database.Migrate();
+      }
+
       if (env.IsDevelopment())
       {
         app.UseDeveloperExceptionPage();

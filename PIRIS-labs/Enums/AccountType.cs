@@ -2,7 +2,7 @@
 {
   public enum AccountType
   {
-    Active,
-    Passive
+    Passive,
+    Active
   }
 }

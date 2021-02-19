@@ -1,29 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
 using PIRIS_labs.Enums;
 
 namespace PIRIS_labs.Data.Entities
 {
   public class AccountPlan: IEntity
   {
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public Guid ID { get; set; }
-
-    [Required]
+    [Key]
     [StringLength(4)]
-    public string AccountNumber { get; set; }
+    public string Number { get; set; }
 
     [Required]
     [StringLength(250)]
-    public string AccountName { get; set; }
-
-    [Required]
-    public AccountType AccountType { get; set; }
-
-    public virtual ICollection<Account> Accounts { get; set; }
-    public virtual ICollection<DepositPlan> MainAccountPlanOfDeposits { get; set; }
-    public virtual ICollection<DepositPlan> PercentAccountPlanOfDeposits { get; set; }
+    public string Name { get; set; }
+    public AccountType Type { get; set; }
   }
 }

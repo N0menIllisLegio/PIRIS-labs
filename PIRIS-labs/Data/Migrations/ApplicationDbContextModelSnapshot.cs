@@ -21,17 +21,13 @@ namespace PIRIS_labs.Migrations
 
             modelBuilder.Entity("PIRIS_labs.Data.Entities.Account", b =>
                 {
-                    b.Property<Guid>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("AccountNumber")
-                        .IsRequired()
+                    b.Property<string>("Number")
                         .HasMaxLength(13)
                         .HasColumnType("nvarchar(13)");
 
-                    b.Property<Guid>("AccountPlanID")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("AccountPlanNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(4)");
 
                     b.Property<decimal>("Balance")
                         .HasColumnType("decimal(18,2)");
@@ -42,64 +38,71 @@ namespace PIRIS_labs.Migrations
                     b.Property<decimal>("DebitValue")
                         .HasColumnType("decimal(18,2)");
 
-                    b.HasKey("ID");
+                    b.Property<Guid>("OwnerID")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.HasIndex("AccountPlanID");
+                    b.HasKey("Number");
+
+                    b.HasIndex("AccountPlanNumber");
+
+                    b.HasIndex("OwnerID");
 
                     b.ToTable("Accounts");
+
+                    b.HasData(
+                        new
+                        {
+                            Number = "7327000010017",
+                            AccountPlanNumber = "7327",
+                            Balance = 1000000000m,
+                            CreditValue = 1000000000m,
+                            DebitValue = 0m,
+                            OwnerID = new Guid("627de68a-7c1e-4983-9345-61351783b9e7")
+                        });
                 });
 
             modelBuilder.Entity("PIRIS_labs.Data.Entities.AccountPlan", b =>
                 {
-                    b.Property<Guid>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("Number")
+                        .HasMaxLength(4)
+                        .HasColumnType("nvarchar(4)");
 
-                    b.Property<string>("AccountName")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
-                    b.Property<string>("AccountNumber")
-                        .IsRequired()
-                        .HasMaxLength(4)
-                        .HasColumnType("nvarchar(4)");
-
-                    b.Property<int>("AccountType")
+                    b.Property<int>("Type")
                         .HasColumnType("int");
 
-                    b.HasKey("ID");
+                    b.HasKey("Number");
 
                     b.ToTable("AccountPlans");
 
                     b.HasData(
                         new
                         {
-                            ID = new Guid("adcaecb8-86f8-4ef3-a57a-6ca703c28daa"),
-                            AccountName = "Passive account for Individuals",
-                            AccountNumber = "3014",
-                            AccountType = 1
+                            Number = "3014",
+                            Name = "Passive account for Individuals",
+                            Type = 0
                         },
                         new
                         {
-                            ID = new Guid("e89271c8-a70d-40b2-b07e-e844cd02ab95"),
-                            AccountName = "Active account for Entities",
-                            AccountNumber = "2400",
-                            AccountType = 0
+                            Number = "2400",
+                            Name = "Active account for Individuals",
+                            Type = 1
                         },
                         new
                         {
-                            ID = new Guid("cc3aecab-f513-4d27-b7ff-265923741884"),
-                            AccountName = "Bank cash desk account",
-                            AccountNumber = "1010",
-                            AccountType = 0
+                            Number = "1010",
+                            Name = "Bank cashbox account",
+                            Type = 1
                         },
                         new
                         {
-                            ID = new Guid("babf196b-1f70-4377-9275-adb49b200cc3"),
-                            AccountName = "Bank Development Fund account",
-                            AccountNumber = "7327",
-                            AccountType = 1
+                            Number = "7327",
+                            Name = "Bank Development Fund account",
+                            Type = 0
                         });
                 });
 
@@ -116,51 +119,47 @@ namespace PIRIS_labs.Migrations
                     b.HasData(
                         new
                         {
-                            Name = "Yerpolis"
+                            Name = "Vienna"
                         },
                         new
                         {
-                            Name = "Purgh"
+                            Name = "Zürich"
                         },
                         new
                         {
-                            Name = "Jine"
+                            Name = "Vancouver"
                         },
                         new
                         {
-                            Name = "Fleim"
+                            Name = "Munich"
                         },
                         new
                         {
-                            Name = "Besding"
+                            Name = "Auckland"
                         },
                         new
                         {
-                            Name = "Keedlas"
+                            Name = "Düsseldorf"
                         },
                         new
                         {
-                            Name = "Dorough"
+                            Name = "Frankfurt"
                         },
                         new
                         {
-                            Name = "Stranta"
+                            Name = "Copenhagen"
                         },
                         new
                         {
-                            Name = "Jeka"
+                            Name = "Geneva"
                         },
                         new
                         {
-                            Name = "Qesa"
+                            Name = "Basel"
                         },
                         new
                         {
-                            Name = "Olislas"
-                        },
-                        new
-                        {
-                            Name = "Icofield"
+                            Name = "Sydney"
                         });
                 });
 
@@ -297,6 +296,34 @@ namespace PIRIS_labs.Migrations
                         .IsUnique();
 
                     b.ToTable("Clients");
+
+                    b.HasData(
+                        new
+                        {
+                            ID = new Guid("627de68a-7c1e-4983-9345-61351783b9e7"),
+                            ActualResidenceAddress = "Praterstrasse 72",
+                            ActualResidenceCityName = "Vienna",
+                            BirthPlace = "Nibelheim",
+                            Birthday = new DateTime(1987, 5, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            DisabilityName = "None",
+                            Gender = 1,
+                            IdentificationNumber = "8463627K730PB2",
+                            LiableForMilitaryService = true,
+                            MaritalStatusName = "Single",
+                            Name = "Lockhart",
+                            NationalityName = "Austrian",
+                            PassportIssuedBy = "Österreichische Staatsdruckerei",
+                            PassportIssuedDate = new DateTime(2003, 4, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            PassportNumber = "0926088",
+                            PassportSeries = "DD",
+                            Patronymic = "Rokkuhāto",
+                            Pensioner = false,
+                            Position = "Chief Financial Officer",
+                            RegistrationAddress = "Praterstrasse 72",
+                            RegistrationCityName = "Vienna",
+                            Surname = "Tifa",
+                            WorkPlace = "Bank"
+                        });
                 });
 
             modelBuilder.Entity("PIRIS_labs.Data.Entities.Deposit", b =>
@@ -317,11 +344,13 @@ namespace PIRIS_labs.Migrations
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("MainAccountID")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("MainAccountNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(13)");
 
-                    b.Property<Guid>("PercentAccountID")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("PercentAccountNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(13)");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
@@ -332,9 +361,9 @@ namespace PIRIS_labs.Migrations
 
                     b.HasIndex("DepositPlanID");
 
-                    b.HasIndex("MainAccountID");
+                    b.HasIndex("MainAccountNumber");
 
-                    b.HasIndex("PercentAccountID");
+                    b.HasIndex("PercentAccountNumber");
 
                     b.ToTable("Deposits");
                 });
@@ -348,9 +377,6 @@ namespace PIRIS_labs.Migrations
                     b.Property<int>("DayPeriod")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("MainAccountPlanID")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(250)
@@ -359,59 +385,44 @@ namespace PIRIS_labs.Migrations
                     b.Property<decimal>("Percent")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<Guid>("PercentAccountPlanID")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<bool>("Revocable")
                         .HasColumnType("bit");
 
                     b.HasKey("ID");
-
-                    b.HasIndex("MainAccountPlanID");
-
-                    b.HasIndex("PercentAccountPlanID");
 
                     b.ToTable("DepositPlans");
 
                     b.HasData(
                         new
                         {
-                            ID = new Guid("be9ac5eb-fe7a-4388-9d25-687531f431eb"),
+                            ID = new Guid("d8ffaf98-6dcb-4310-a76d-39d0a2b7ed48"),
                             DayPeriod = 20,
-                            MainAccountPlanID = new Guid("adcaecb8-86f8-4ef3-a57a-6ca703c28daa"),
                             Name = "Standard",
                             Percent = 0.01m,
-                            PercentAccountPlanID = new Guid("adcaecb8-86f8-4ef3-a57a-6ca703c28daa"),
                             Revocable = true
                         },
                         new
                         {
-                            ID = new Guid("bce0f9c6-fc36-4ac6-a52d-f9103a3de885"),
+                            ID = new Guid("979f2c2e-f263-43b3-aca6-800fa0a3668f"),
                             DayPeriod = 40,
-                            MainAccountPlanID = new Guid("adcaecb8-86f8-4ef3-a57a-6ca703c28daa"),
                             Name = "Standard+",
                             Percent = 0.05m,
-                            PercentAccountPlanID = new Guid("adcaecb8-86f8-4ef3-a57a-6ca703c28daa"),
                             Revocable = false
                         },
                         new
                         {
-                            ID = new Guid("5ef7958f-a759-4206-9786-f2c0dcbc9304"),
+                            ID = new Guid("464fe5a5-1621-4078-9258-cc6d9bca5147"),
                             DayPeriod = 100,
-                            MainAccountPlanID = new Guid("adcaecb8-86f8-4ef3-a57a-6ca703c28daa"),
                             Name = "Medium",
                             Percent = 0.1m,
-                            PercentAccountPlanID = new Guid("adcaecb8-86f8-4ef3-a57a-6ca703c28daa"),
                             Revocable = false
                         },
                         new
                         {
-                            ID = new Guid("5321574e-16f1-4b70-945a-66b650ed661b"),
+                            ID = new Guid("5125376b-1fb8-4e1d-80ee-df7a5504cf9b"),
                             DayPeriod = 220,
-                            MainAccountPlanID = new Guid("adcaecb8-86f8-4ef3-a57a-6ca703c28daa"),
                             Name = "Ultra",
                             Percent = 0.4m,
-                            PercentAccountPlanID = new Guid("adcaecb8-86f8-4ef3-a57a-6ca703c28daa"),
                             Revocable = true
                         });
                 });
@@ -433,59 +444,15 @@ namespace PIRIS_labs.Migrations
                         },
                         new
                         {
-                            Name = "Musculoskeletal System"
+                            Name = "Grade 1"
                         },
                         new
                         {
-                            Name = "Special Senses and Speech"
+                            Name = "Grade 2"
                         },
                         new
                         {
-                            Name = "Respiratory Disorders"
-                        },
-                        new
-                        {
-                            Name = "Cardiovascular System"
-                        },
-                        new
-                        {
-                            Name = "Digestive System"
-                        },
-                        new
-                        {
-                            Name = "Genitourinary Disorders"
-                        },
-                        new
-                        {
-                            Name = "Hematological Disorders"
-                        },
-                        new
-                        {
-                            Name = "Skin Disorders"
-                        },
-                        new
-                        {
-                            Name = "Endocrine Disorders"
-                        },
-                        new
-                        {
-                            Name = "Congenital Disorders that Affect Multiple Body Systems"
-                        },
-                        new
-                        {
-                            Name = "Neurological Disorders"
-                        },
-                        new
-                        {
-                            Name = "Mental Disorders"
-                        },
-                        new
-                        {
-                            Name = "Cancer (Malignant Neoplastic Diseases)"
-                        },
-                        new
-                        {
-                            Name = "Immune System Disorders"
+                            Name = "Grade 3"
                         });
                 });
 
@@ -624,20 +591,22 @@ namespace PIRIS_labs.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<Guid>("CreditAccountID")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("DebetAccountID")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<DateTime>("TransactionDay")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("TransferFromAccountNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(13)");
+
+                    b.Property<string>("TransferToAccountNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(13)");
+
                     b.HasKey("ID");
 
-                    b.HasIndex("CreditAccountID");
+                    b.HasIndex("TransferFromAccountNumber");
 
-                    b.HasIndex("DebetAccountID");
+                    b.HasIndex("TransferToAccountNumber");
 
                     b.ToTable("Transactions");
                 });
@@ -645,12 +614,20 @@ namespace PIRIS_labs.Migrations
             modelBuilder.Entity("PIRIS_labs.Data.Entities.Account", b =>
                 {
                     b.HasOne("PIRIS_labs.Data.Entities.AccountPlan", "AccountPlan")
-                        .WithMany("Accounts")
-                        .HasForeignKey("AccountPlanID")
+                        .WithMany()
+                        .HasForeignKey("AccountPlanNumber")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PIRIS_labs.Data.Entities.Client", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("AccountPlan");
+
+                    b.Navigation("Owner");
                 });
 
             modelBuilder.Entity("PIRIS_labs.Data.Entities.Client", b =>
@@ -705,20 +682,20 @@ namespace PIRIS_labs.Migrations
                         .IsRequired();
 
                     b.HasOne("PIRIS_labs.Data.Entities.DepositPlan", "DepositPlan")
-                        .WithMany("Deposits")
+                        .WithMany()
                         .HasForeignKey("DepositPlanID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("PIRIS_labs.Data.Entities.Account", "MainAccount")
-                        .WithMany("MainAccountDeposits")
-                        .HasForeignKey("MainAccountID")
+                        .WithMany()
+                        .HasForeignKey("MainAccountNumber")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("PIRIS_labs.Data.Entities.Account", "PercentAccount")
-                        .WithMany("PercentAccountDeposits")
-                        .HasForeignKey("PercentAccountID")
+                        .WithMany()
+                        .HasForeignKey("PercentAccountNumber")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -731,67 +708,23 @@ namespace PIRIS_labs.Migrations
                     b.Navigation("PercentAccount");
                 });
 
-            modelBuilder.Entity("PIRIS_labs.Data.Entities.DepositPlan", b =>
-                {
-                    b.HasOne("PIRIS_labs.Data.Entities.AccountPlan", "MainAccountPlan")
-                        .WithMany("MainAccountPlanOfDeposits")
-                        .HasForeignKey("MainAccountPlanID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("PIRIS_labs.Data.Entities.AccountPlan", "PercentAccountPlan")
-                        .WithMany("PercentAccountPlanOfDeposits")
-                        .HasForeignKey("PercentAccountPlanID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("MainAccountPlan");
-
-                    b.Navigation("PercentAccountPlan");
-                });
-
             modelBuilder.Entity("PIRIS_labs.Data.Entities.Transaction", b =>
                 {
-                    b.HasOne("PIRIS_labs.Data.Entities.Account", "CreditAccount")
-                        .WithMany("CreditTransactions")
-                        .HasForeignKey("CreditAccountID")
+                    b.HasOne("PIRIS_labs.Data.Entities.Account", "TransferFromAccount")
+                        .WithMany()
+                        .HasForeignKey("TransferFromAccountNumber")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PIRIS_labs.Data.Entities.Account", "DebitAccount")
-                        .WithMany("DebitTransactions")
-                        .HasForeignKey("DebetAccountID")
+                    b.HasOne("PIRIS_labs.Data.Entities.Account", "TransferToAccount")
+                        .WithMany()
+                        .HasForeignKey("TransferToAccountNumber")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("CreditAccount");
+                    b.Navigation("TransferFromAccount");
 
-                    b.Navigation("DebitAccount");
-                });
-
-            modelBuilder.Entity("PIRIS_labs.Data.Entities.Account", b =>
-                {
-                    b.Navigation("CreditTransactions");
-
-                    b.Navigation("DebitTransactions");
-
-                    b.Navigation("MainAccountDeposits");
-
-                    b.Navigation("PercentAccountDeposits");
-                });
-
-            modelBuilder.Entity("PIRIS_labs.Data.Entities.AccountPlan", b =>
-                {
-                    b.Navigation("Accounts");
-
-                    b.Navigation("MainAccountPlanOfDeposits");
-
-                    b.Navigation("PercentAccountPlanOfDeposits");
-                });
-
-            modelBuilder.Entity("PIRIS_labs.Data.Entities.DepositPlan", b =>
-                {
-                    b.Navigation("Deposits");
+                    b.Navigation("TransferToAccount");
                 });
 #pragma warning restore 612, 618
         }

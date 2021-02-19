@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -7,26 +6,22 @@ namespace PIRIS_labs.Data.Entities
 {
   public class Account: IEntity
   {
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public Guid ID { get; set; }
-
-    [Required]
+    [Key]
     [StringLength(13)]
-    public string AccountNumber { get; set; }
+    public string Number { get; set; }
 
     public decimal DebitValue { get; set; }
     public decimal CreditValue { get; set; }
     public decimal Balance { get; set; }
 
-    public Guid AccountPlanID { get; set; }
-
     [Required]
     public virtual AccountPlan AccountPlan { get; set; }
+    public string AccountPlanNumber { get; set; }
 
-    public virtual ICollection<Deposit> MainAccountDeposits { get; set; }
-    public virtual ICollection<Deposit> PercentAccountDeposits { get; set; }
+    [Required]
+    public virtual Client Owner { get; set; }
 
-    public virtual ICollection<Transaction> CreditTransactions { get; set; }
-    public virtual ICollection<Transaction> DebitTransactions { get; set; }
+    [ForeignKey(nameof(Owner))]
+    public Guid OwnerID { get; set; }
   }
 }

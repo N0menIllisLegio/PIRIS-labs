@@ -25,37 +25,6 @@ namespace PIRIS_labs.Data
     protected override void OnModelCreating(ModelBuilder builder)
     {
       base.OnModelCreating(builder);
-
-      builder.Entity<Deposit>()
-        .HasOne(p => p.MainAccount)
-        .WithMany(p => p.MainAccountDeposits)
-        .HasForeignKey(p => p.MainAccountID);
-
-      builder.Entity<Deposit>()
-        .HasOne(p => p.PercentAccount)
-        .WithMany(p => p.PercentAccountDeposits)
-        .HasForeignKey(p => p.PercentAccountID);
-
-      builder.Entity<Transaction>()
-        .HasOne(p => p.CreditAccount)
-        .WithMany(p => p.CreditTransactions)
-        .HasForeignKey(p => p.CreditAccountID);
-
-      builder.Entity<Transaction>()
-        .HasOne(p => p.DebitAccount)
-        .WithMany(p => p.DebitTransactions)
-        .HasForeignKey(p => p.DebetAccountID);
-
-      builder.Entity<DepositPlan>()
-        .HasOne(p => p.MainAccountPlan)
-        .WithMany(p => p.MainAccountPlanOfDeposits)
-        .HasForeignKey(p => p.MainAccountPlanID);
-
-      builder.Entity<DepositPlan>()
-        .HasOne(p => p.PercentAccountPlan)
-        .WithMany(p => p.PercentAccountPlanOfDeposits)
-        .HasForeignKey(p => p.PercentAccountPlanID);
-
       DatabaseSeeder.SeedDatabase(builder);
     }
   }

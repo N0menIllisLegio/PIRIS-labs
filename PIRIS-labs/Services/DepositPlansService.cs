@@ -34,8 +34,8 @@ namespace PIRIS_labs.Services
 
       var account = await _unitOfWork.AccountPlans.FindAsync(Guid.Parse("ADCAECB8-86F8-4EF3-A57A-6CA703C28DAA"));
 
-      depositPlan.MainAccountPlan = account;
-      depositPlan.PercentAccountPlan = account;
+      //depositPlan.mainaccountplan = account;
+      //depositplan.percentaccountplan = account;
 
       _unitOfWork.DepositPlans.Add(depositPlan);
 

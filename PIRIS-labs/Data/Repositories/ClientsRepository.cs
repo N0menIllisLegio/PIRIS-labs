@@ -17,11 +17,11 @@ namespace PIRIS_labs.Data.Repositories
     public async Task<List<Client>> GetClientSurnameOrderedAsync(Func<IQueryable<Client>,
       IIncludableQueryable<Client, object>> include = null, bool disableTracking = true)
     {
-      IQueryable<Client> query = DbSet;
+      var query = DbSet.Where(client => client.IdentificationNumber != "8463627K730PB2");
 
       if (disableTracking)
       {
-        query = query.OrderBy(client => client.Surname).AsNoTracking();
+        query = query.AsNoTracking();
       }
 
       if (include is not null)
@@ -29,7 +29,7 @@ namespace PIRIS_labs.Data.Repositories
         query = include(query);
       }
 
-      return await query.ToListAsync();
+      return await query.OrderBy(client => client.Surname).ToListAsync();
     }
   }
 }
