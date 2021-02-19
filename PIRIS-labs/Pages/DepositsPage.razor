@@ -2,17 +2,64 @@
 
 @using Services
 @using DTOs.Deposit
-@inject DepositsService depositsService
+@using Microsoft.Extensions.DependencyInjection
+
+@inject IServiceScopeFactory serviceScopeFactory
+
 @inject NavigationManager NavigationManager
 
 <div class="container-fluid">
-  <h1 class="m-5">Deposits</h1>
+  <h1 class="m-5">Deposit Plans</h1>
 
-  <div class="d-flex justify-content-end fixed-bottom">
-    <NavLink class="btn-lg btn-success m-5 p-3" href="@link" Match="NavLinkMatch.All">
-      Add new deposit
-    </NavLink>
+  <div>
+    @if (_depositPlans is not null && _depositPlans.Count > 0)
+    {
+      <table class="table table-bordered table-hover">
+        <thead class="thead-dark">
+          <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Time, days</th>
+            <th scope="col">Percent a year, %</th>
+            <th scope="col">Revocable</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @foreach (var depositPlan in _depositPlans)
+          {
+            <tr>
+              <th scope="row">@depositPlan.Name</th>
+              <td>@depositPlan.DayPeriod</td>
+              <td>@depositPlan.Percent</td>
+              <td>
+                @if (@depositPlan.Revocable)
+                {<div>Yes</div>}
+                else
+                {<div>No</div>}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+    else if (_depositPlans is null)
+    {
+      <div class="d-flex justify-content-center m-5">
+        <div class="spinner-border" role="status">
+          <span class="sr-only">Loading...</span>
+        </div>
+      </div>
+    }
+    else
+    {
+      <blockquote class="blockquote m-5">
+        <p class="mb-0">There are no deposit plans here.</p>
+        <footer class="blockquote-footer"><cite>Add first</cite></footer>
+      </blockquote>
+    }
   </div>
+
+  <h1 class="m-5">Deposits</h1>
 
   <div>
     @if (_deposits is not null && _deposits.Count > 0)
@@ -30,12 +77,12 @@
         <tbody>
           @foreach (var deposit in _deposits)
           {
-          <tr class="pointerCursor">
-            <th scope="row">@deposit.DepositPlan</th>
-            <td>@deposit.Client</td>
-            <td>@deposit.Amount</td>
-            <td>@deposit.AccumulatedAmount</td>
-          </tr>
+            <tr class="pointerCursor">
+              <th scope="row">@deposit.DepositPlan</th>
+              <td>@deposit.Client</td>
+              <td>@deposit.Amount</td>
+              <td>@deposit.AccumulatedAmount</td>
+            </tr>
           }
         </tbody>
       </table>
@@ -57,21 +104,37 @@
     }
   </div>
 
+  <div class="d-flex justify-content-end fixed-bottom m-5">
+    <NavLink class="btn-lg btn-success p-3 mr-2" href="@linkDepositPlanEdit" Match="NavLinkMatch.All">
+      Add new plan
+    </NavLink>
+
+    <NavLink class="btn-lg btn-success p-3" href="@linkDepositEdit" Match="NavLinkMatch.All">
+      Add new deposit
+    </NavLink>
+  </div>
 </div>
 
 @code
 {
   private IReadOnlyList<DepositDto> _deposits;
-  private string link = $"/deposit/edit";
+  private IReadOnlyList<DepositPlanDto> _depositPlans;
+  private string linkDepositEdit = $"/deposit/edit";
+  private string linkDepositPlanEdit = $"/deposit-plan/edit";
 
   protected override async Task OnInitializedAsync()
   {
-    await RefreshClientsTable();
+    await RefreshDepositsTables();
     await base.OnInitializedAsync();
   }
 
-  private async Task RefreshClientsTable()
+  private async Task RefreshDepositsTables()
   {
+    using var scope = serviceScopeFactory.CreateScope();
+    var depositsService = scope.ServiceProvider.GetService<DepositsService>();
+    var depositPlansService = scope.ServiceProvider.GetService<DepositPlansService>();
+
+    _depositPlans = await depositPlansService.GetDepositPlansAsync();
     _deposits = await depositsService.GetDepositsAsync();
   }
 }

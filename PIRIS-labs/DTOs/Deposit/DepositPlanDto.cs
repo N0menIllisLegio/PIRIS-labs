@@ -13,6 +13,7 @@ namespace PIRIS_labs.DTOs.Deposit
     public decimal Percent { get; set; }
     [Range(0, Int32.MaxValue, ErrorMessage = "Days value can't be negative")]
     public int DayPeriod { get; set; }
+    public bool Revocable { get; set; }
 
     public override string ToString()
     {

@@ -2,7 +2,9 @@
 
 @using Services
 @using DTOs.Deposit
-@inject DepositPlansService depositPlansService
+@using Microsoft.Extensions.DependencyInjection
+
+@inject IServiceScopeFactory serviceScopeFactory
 @inject NavigationManager NavigationManager
 
 <div class="container-fluid">
@@ -40,6 +42,14 @@
           </div>
         </div>
       </div>
+      <div class="form-row ml-5 mr-3">
+        <div class="col form-check">
+          <InputCheckbox class="form-check-input" id="revocableCheck" @bind-Value="_depositPlanDto.Revocable" />
+          <label class="form-check-label" for="revocableCheck">
+            Revocable
+          </label>
+        </div>
+      </div>
     </div>
 
     <ValidationSummary />
@@ -64,6 +74,8 @@
   private async Task HandleValidSubmit()
   {
     Spinner = true;
+    using var scope = serviceScopeFactory.CreateScope();
+    var depositPlansService = scope.ServiceProvider.GetService<DepositPlansService>();
 
     var result = await depositPlansService.CreateDepositPlanAsync(_depositPlanDto);
 
@@ -71,11 +83,7 @@
 
     if (result.Success)
     {
-      NavigationManager.NavigateTo("/deposit-plans");
-    }
-    else
-    {
-      // Result = result;
+      NavigationManager.NavigateTo("/deposits");
     }
   }
 }
