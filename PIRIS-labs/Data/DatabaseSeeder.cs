@@ -78,11 +78,12 @@ namespace PIRIS_labs.Data
       var accountPlanBuilder = builder.Entity<AccountPlan>();
       var depositPlanBuilder = builder.Entity<DepositPlan>();
 
-      var accountPlan = new AccountPlan { Number = "7327", Name = "Bank Development Fund account", Type = AccountType.Passive };
+      var bankFundaccountPlan = new AccountPlan { Number = "7327", Name = "Bank Development Fund account", Type = AccountType.Passive };
+      var bankCashboxAccountPlan = new AccountPlan { Number = "1010", Name = "Bank cashbox account", Type = AccountType.Active };
       accountPlanBuilder.HasData(new AccountPlan { Number = "3014", Name = "Passive account for Individuals", Type = AccountType.Passive });
       accountPlanBuilder.HasData(new AccountPlan { Number = "2400", Name = "Active account for Individuals", Type = AccountType.Active });
-      accountPlanBuilder.HasData(new AccountPlan { Number = "1010", Name = "Bank cashbox account", Type = AccountType.Active });
-      accountPlanBuilder.HasData(accountPlan);
+      accountPlanBuilder.HasData(bankCashboxAccountPlan);
+      accountPlanBuilder.HasData(bankFundaccountPlan);
 
       var bankOwner = new Client
       {
@@ -108,17 +109,25 @@ namespace PIRIS_labs.Data
         PassportNumber = "0926088",
         PassportIssuedBy = "Österreichische Staatsdruckerei",
         PassportIssuedDate = new DateTime(2003, 4, 16),
-        IdentificationNumber = "8463627K730PB2",
+        IdentificationNumber = "8463627K730PB2"
       };
 
+      int bankOwnersAccountsNumber = 0;
       builder.Entity<Client>().HasData(bankOwner);
       builder.Entity<Account>().HasData(new Account
       {
-        AccountPlanNumber = accountPlan.Number,
-        Number = $"{accountPlan.Number}000010017",
+        AccountPlanNumber = bankFundaccountPlan.Number,
+        Number = $"{bankFundaccountPlan.Number}00001{++bankOwnersAccountsNumber:000}7", // 00001 - bankOwner.Number, but its generates in DB
         OwnerID = bankOwner.ID,
         CreditValue = 1_000_000_000,
         Balance = 1_000_000_000
+      });
+
+      builder.Entity<Account>().HasData(new Account
+      {
+        AccountPlanNumber = bankCashboxAccountPlan.Number,
+        Number = $"{bankCashboxAccountPlan.Number}00001{++bankOwnersAccountsNumber:000}7", // 00001 - bankOwner.Number, but its generates in DB
+        OwnerID = bankOwner.ID
       });
 
       depositPlanBuilder.HasData(new DepositPlan { ID = Guid.Parse("D8FFAF98-6DCB-4310-A76D-39D0A2B7ED48"), Name = "Standard", DayPeriod = 20, Percent = 0.01m, Revocable = true });
