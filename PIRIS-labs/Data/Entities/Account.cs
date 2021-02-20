@@ -14,6 +14,8 @@ namespace PIRIS_labs.Data.Entities
     public decimal CreditValue { get; set; }
     public decimal Balance { get; set; }
 
+    public int? ClientsAccountNumber { get; set; }
+
     [Required]
     public virtual AccountPlan AccountPlan { get; set; }
     public string AccountPlanNumber { get; set; }

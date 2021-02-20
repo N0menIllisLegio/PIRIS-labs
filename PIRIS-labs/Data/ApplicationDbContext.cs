@@ -25,6 +25,10 @@ namespace PIRIS_labs.Data
     protected override void OnModelCreating(ModelBuilder builder)
     {
       base.OnModelCreating(builder);
+
+      builder.Entity<Account>().Property(p => p.ClientsAccountNumber)
+        .HasComputedColumnSql("CAST(SUBSTRING([Number], 10, 3) AS INT)", stored: true);
+
       DatabaseSeeder.SeedDatabase(builder);
     }
   }
