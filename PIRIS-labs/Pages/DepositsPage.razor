@@ -9,7 +9,12 @@
 @inject NavigationManager NavigationManager
 
 <div class="container-fluid">
-  <h1 class="m-5">Deposit Plans</h1>
+  <div class="d-flex justify-content-between m-5">
+    <h1>Deposit Plans</h1>
+    <NavLink class="btn-lg btn-success p-3" href="@linkDepositPlanEdit" Match="NavLinkMatch.All">
+      Add new plan
+    </NavLink>
+  </div>
 
   <div>
     @if (_depositPlans is not null && _depositPlans.Count > 0)
@@ -59,12 +64,17 @@
     }
   </div>
 
-  <h1 class="m-5">Deposits</h1>
+  <div class="d-flex justify-content-between m-5">
+    <h1>Deposits</h1>
+    <NavLink class="btn-lg btn-success p-3" href="@linkDepositEdit" Match="NavLinkMatch.All">
+      Add new deposit
+    </NavLink>
+  </div>
 
   <div>
     @if (_deposits is not null && _deposits.Count > 0)
     {
-      <table class="table table-bordered table-hover">
+      <table class="table table-bordered table-hover mb-5">
         <thead class="thead-dark">
           <tr>
             <th scope="col">Deposit Plan</th>
@@ -102,16 +112,6 @@
         <footer class="blockquote-footer"><cite>Add first</cite></footer>
       </blockquote>
     }
-  </div>
-
-  <div class="d-flex justify-content-end fixed-bottom m-5">
-    <NavLink class="btn-lg btn-success p-3 mr-2" href="@linkDepositPlanEdit" Match="NavLinkMatch.All">
-      Add new plan
-    </NavLink>
-
-    <NavLink class="btn-lg btn-success p-3" href="@linkDepositEdit" Match="NavLinkMatch.All">
-      Add new deposit
-    </NavLink>
   </div>
 </div>
 
