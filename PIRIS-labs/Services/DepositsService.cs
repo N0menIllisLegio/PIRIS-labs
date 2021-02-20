@@ -15,39 +15,57 @@ namespace PIRIS_labs.Services
   {
     private readonly UnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
+    private readonly AccountsService _accountsService;
 
-    public DepositsService(UnitOfWork unitOfWork, IMapper mapper)
+    public DepositsService(UnitOfWork unitOfWork, IMapper mapper, AccountsService accountsService)
     {
       _unitOfWork = unitOfWork;
       _mapper = mapper;
+      _accountsService = accountsService;
     }
 
     public async Task<List<DepositDto>> GetDepositsAsync()
     {
-      var deposits = await _unitOfWork.Deposits.GetAllAsync(deposit => deposit.Include(p => p.PercentAccount).Include(p => p.Client).Include(p => p.DepositPlan));
+      var deposits = await _unitOfWork.Deposits.GetAllAsync(deposit => deposit
+      .Include(p => p.PercentAccount)
+      .Include(p => p.Client)
+      .Include(p => p.DepositPlan));
 
       return deposits.Select(_mapper.Map<DepositDto>).ToList();
     }
 
     public async Task<ResultDto> CreateDepositAsync(CreateDepositDto createDepositDto)
     {
-      var client = await _unitOfWork.Clients.FindAsync(createDepositDto.ClientID);
-      var depositPlan = await _unitOfWork.DepositPlans.FindAsync(createDepositDto.DepositPlanID);
-
-      var deposit = new Deposit
+      using (var transaction = _unitOfWork.BeginTransaction())
       {
-        Client = client,
-        DepositPlan = depositPlan,
-        Amount = createDepositDto.Amount,
-        StartDate = DateTime.Now,
-        EndDate = DateTime.Now.AddDays(depositPlan.DayPeriod),
-      };
+        try
+        {
+          var deposit = _mapper.Map<Deposit>(createDepositDto);
+          var depositPlan = await _unitOfWork.DepositPlans.FindAsync(createDepositDto.DepositPlanID);
+          deposit.StartDate = DateTime.Today;
+          deposit.EndDate = DateTime.Today.AddDays(depositPlan.DayPeriod);
 
-      _unitOfWork.Deposits.Add(deposit);
+          var (mainAccount, percentAccount) = await _accountsService.OpenDepositAccountsAsync(deposit.ClientID);
 
-      await _unitOfWork.SaveAsync();
+          deposit.MainAccount = mainAccount;
+          deposit.PercentAccount = percentAccount;
 
-      return new ResultDto { Success = true };
+          // add money transactions - cashbox -> client's account -> bank fund
+
+          _unitOfWork.Deposits.Add(deposit);
+
+          await _unitOfWork.SaveAsync();
+
+          await transaction.CommitAsync();
+
+          return new ResultDto { Success = true };
+        }
+        catch (Exception ex)
+        {
+          await transaction.RollbackAsync();
+          return new ResultDto { Success = false, Message = ex.Message };
+        }
+      }
     }
   }
 }
