@@ -130,5 +130,17 @@ namespace PIRIS_labs.Services
         }
       }
     }
+
+    public async Task CalculateDepositsPercents()
+    {
+      var depositPercentAccounts = await _unitOfWork.Deposits.GetOpenDepositPercentAccounts();
+      var developmentFundAccount = await _unitOfWork.Accounts.GetBankDevelopmentFundAccount();
+
+      foreach (var depositPercentAccount in depositPercentAccounts)
+      {
+        decimal amount = depositPercentAccount.DepositAmount * (depositPercentAccount.Percent / 100 / (DateTime.IsLeapYear(DateTime.Now.Year) ? 366 : 365));
+        await _transactionsService.CreateTransaction(developmentFundAccount, depositPercentAccount.Account, amount);
+      }
+    }
   }
 }

@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using PIRIS_labs.Data.Entities;
+using PIRIS_labs.DTOs.Common;
 
 namespace PIRIS_labs.Data.Repositories
 {
@@ -10,6 +13,16 @@ namespace PIRIS_labs.Data.Repositories
     public AccountsRepository(ApplicationDbContext applicationDbContext)
         : base(applicationDbContext)
     { }
+
+    public async Task<List<AccountTypeDto>> GetAccountsWithTypes()
+    {
+      var query = DbSet.Join(ApplicationDbContext.AccountPlans,
+        account => account.AccountPlanNumber,
+        accountPlan => accountPlan.Number,
+        (account, accountPlan) => new AccountTypeDto { Account = account, AccountType = accountPlan.Type });
+
+      return await query.ToListAsync();
+    }
 
     public int GetClientsLastAccountNumber(Guid clientID)
     {

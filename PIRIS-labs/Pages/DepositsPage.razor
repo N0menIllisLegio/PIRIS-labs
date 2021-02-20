@@ -94,10 +94,17 @@
             <td>@deposit.Client</td>
             <td>@deposit.EndDate.ToShortDateString()</td>
             <td>@deposit.Amount</td>
-            <td>@deposit.AccumulatedAmount</td>
+            @if (!deposit.Closed)
+            {
+              <td>@deposit.AccumulatedAmount</td>
+            }
+            else
+            {
+              <td>—</td>
+            }
             @if (!deposit.Closed && deposit.Revocable)
             {
-              <td class="pointerCursor alert alert-danger" @onclick="@(() => CloseDeposit(deposit))" @onclick:preventDefault><span class="fa fa-window-close"/></td>
+              <td class="pointerCursor alert alert-danger" @onclick="@(() => CloseDeposit(deposit))" @onclick:preventDefault><span class="fa fa-window-close" /></td>
             }
             else
             {
