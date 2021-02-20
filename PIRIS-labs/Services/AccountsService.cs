@@ -10,8 +10,6 @@ namespace PIRIS_labs.Services
   {
     private const string _passiveIndividualAccountNumber = "3014";
 
-    private static readonly Random _randomizer = new Random();
-
     private readonly UnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
 
@@ -24,19 +22,20 @@ namespace PIRIS_labs.Services
     public async Task<(Account main, Account percent)> OpenDepositAccountsAsync(Guid clientID)
     {
       var client = await _unitOfWork.Clients.FindAsync(clientID);
+      int accountNumber = _unitOfWork.Accounts.GetClientsLastAccountNumber(clientID);
 
       var mainAccount = new Account
       {
         OwnerID = clientID,
         AccountPlanNumber = _passiveIndividualAccountNumber,
-        Number = GenerateAccountNumber(_passiveIndividualAccountNumber, client.Number)
+        Number = GenerateAccountNumber(_passiveIndividualAccountNumber, client.Number, ++accountNumber)
       };
 
       var percentAccount = new Account
       {
         OwnerID = clientID,
         AccountPlanNumber = _passiveIndividualAccountNumber,
-        Number = GenerateAccountNumber(_passiveIndividualAccountNumber, client.Number)
+        Number = GenerateAccountNumber(_passiveIndividualAccountNumber, client.Number, ++accountNumber)
       };
 
       _unitOfWork.Accounts.Add(mainAccount);
@@ -46,9 +45,9 @@ namespace PIRIS_labs.Services
       return (mainAccount, percentAccount);
     }
 
-    private string GenerateAccountNumber(string accountPlanNumber, int clientNumber)
+    private string GenerateAccountNumber(string accountPlanNumber, int clientNumber, int accountNumber)
     {
-      return $"{accountPlanNumber}{clientNumber:00000}{_randomizer.Next(0, 999):000}7";
+      return $"{accountPlanNumber}{clientNumber:00000}{accountNumber:000}7";
     }
   }
 }
