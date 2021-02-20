@@ -108,7 +108,7 @@
   private IReadOnlyList<DepositPlanDto> _depositPlans = new List<DepositPlanDto>();
   private CreateDepositDto _createDeposit = new CreateDepositDto();
   private bool Spinner = false;
-  private PIRIS_labs.DTOs.ResultDto Result;
+  private PIRIS_labs.DTOs.ResultDto Result = new DTOs.ResultDto { Success = true };
 
   private string DepositInfo
   {
