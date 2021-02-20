@@ -2,7 +2,6 @@
 using PIRIS_labs.Data.Entities;
 using PIRIS_labs.DTOs.Client;
 using PIRIS_labs.DTOs.Deposit;
-using PIRIS_labs.DTOs.Transaction;
 
 namespace PIRIS_labs.Helpers
 {
@@ -16,6 +15,8 @@ namespace PIRIS_labs.Helpers
       CreateMap<MaritalStatus, MaritalStatusDto>();
       CreateMap<Nationality, NationalityDto>();
       CreateMap<DepositPlan, DepositPlanDto>().ReverseMap();
+
+      // TODO change
       CreateMap<Deposit, DepositDto>()
         .ForMember(dest => dest.DepositPlan, opt => opt.MapFrom(src => src.DepositPlan.Name))
         .ForMember(dest => dest.Client, opt => opt.MapFrom(src => $"{src.Client.Surname} {src.Client.Name} {src.Client.Patronymic}"))

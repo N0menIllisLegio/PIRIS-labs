@@ -68,18 +68,25 @@
         </div>
       </div>
 
-        <div class="form-row ml-3 mr-3 mb-3">
-          <div class="col input-group">
-            <div class="input-group-prepend">
-              <span class="input-group-text">Deposit Amount</span>
-            </div>
-            <InputNumber @bind-Value="_createDeposit.Amount" class="form-control" />
-            <div class="input-group-append">
-              <span class="input-group-text">BYR</span>
-            </div>
+      <div class="form-row ml-3 mr-3 mb-3">
+        <div class="col input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text">Deposit Amount</span>
+          </div>
+          <InputNumber @bind-Value="_createDeposit.Amount" class="form-control" />
+          <div class="input-group-append">
+            <span class="input-group-text">BYR</span>
           </div>
         </div>
       </div>
+    </div>
+
+    @if (!Result.Success)
+    {
+      <div class="alert alert-danger" role="alert">
+        @Result.Message
+      </div>
+    }
 
     <ValidationSummary />
 
@@ -97,75 +104,68 @@
 
 @code
 {
-    private IReadOnlyList<ClientDto> _clients = new List<ClientDto>();
-    private IReadOnlyList<DepositPlanDto> _depositPlans = new List<DepositPlanDto>();
-    private CreateDepositDto _createDeposit = new CreateDepositDto();
-    private bool Spinner = false;
+  private IReadOnlyList<ClientDto> _clients = new List<ClientDto>();
+  private IReadOnlyList<DepositPlanDto> _depositPlans = new List<DepositPlanDto>();
+  private CreateDepositDto _createDeposit = new CreateDepositDto();
+  private bool Spinner = false;
+  private PIRIS_labs.DTOs.ResultDto Result;
 
-    private string DepositInfo
+  private string DepositInfo
+  {
+    set { }
+    get
     {
-      set { }
-      get
+      var depositPlan = _depositPlans.FirstOrDefault(depositPlan => depositPlan.ID == _createDeposit.DepositPlanID);
+
+      if (depositPlan is null)
       {
-        var depositPlan = _depositPlans.FirstOrDefault(depositPlan => depositPlan.ID == _createDeposit.DepositPlanID);
-
-        if (depositPlan is null)
-        {
-          return String.Empty;
-        }
-
-        string recovableStr = depositPlan.Revocable ? "Revocable" : "Not Revocable";
-        return $"{depositPlan.Percent} % — {depositPlan.DayPeriod} days — {recovableStr}";
+        return String.Empty;
       }
-    }
 
-    private string ClientInfo
+      string recovableStr = depositPlan.Revocable ? "Revocable" : "Not Revocable";
+      return $"{depositPlan.Percent} % — {depositPlan.DayPeriod} days — {recovableStr}";
+    }
+  }
+
+  private string ClientInfo
+  {
+    set { }
+    get
     {
-      set { }
-      get
+      var client = _clients.FirstOrDefault(client => client.ID == _createDeposit.ClientID);
+
+      if (client is null)
       {
-        var client = _clients.FirstOrDefault(client => client.ID == _createDeposit.ClientID);
-
-        if (client is null)
-        {
-          return String.Empty;
-        }
-
-        return $"{client.Surname} {client.Name} {client.Patronymic} — {client.PassportSeries}{client.PassportNumber}";
+        return String.Empty;
       }
-    }
 
-    protected override async Task OnInitializedAsync()
+      return $"{client.Surname} {client.Name} {client.Patronymic} — {client.PassportSeries}{client.PassportNumber}";
+    }
+  }
+
+  protected override async Task OnInitializedAsync()
+  {
+    Spinner = true;
+
+    _clients = (await clientsService.GetClientsAsync()).ToList();
+    _depositPlans = await depositPlansService.GetDepositPlansAsync();
+
+    Spinner = false;
+
+    await base.OnInitializedAsync();
+  }
+
+  private async Task HandleValidSubmit()
+  {
+    Spinner = true;
+
+    Result = await depositsService.CreateDepositAsync(_createDeposit);
+
+    Spinner = false;
+
+    if (Result.Success)
     {
-      Spinner = true;
-
-      _clients = (await clientsService.GetClientsAsync()).ToList();
-      _depositPlans = await depositPlansService.GetDepositPlansAsync();
-
-      Spinner = false;
-
-      await base.OnInitializedAsync();
+      NavigationManager.NavigateTo("/deposits");
     }
-
-    private async Task HandleValidSubmit()
-    {
-      Spinner = true;
-      DTOs.ResultDto result;
-
-      try
-      {
-        result = await depositsService.CreateDepositAsync(_createDeposit);
-      }
-      catch (Exception ex)
-      {
-        result = new DTOs.ResultDto { Success = false, Message = ex.Message };
-      }
-
-      Spinner = false;
-
-      if (result.Success)
-      {
-        NavigationManager.NavigateTo("/deposits");
-      }
-    }
+  }
 }

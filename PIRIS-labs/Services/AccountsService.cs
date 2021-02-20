@@ -23,23 +23,25 @@ namespace PIRIS_labs.Services
     {
       var client = await _unitOfWork.Clients.FindAsync(clientID);
       int accountNumber = _unitOfWork.Accounts.GetClientsLastAccountNumber(clientID);
+      var accountPlan = await _unitOfWork.AccountPlans.FindAsync(_passiveIndividualAccountNumber);
 
       var mainAccount = new Account
       {
         OwnerID = clientID,
-        AccountPlanNumber = _passiveIndividualAccountNumber,
+        AccountPlan = accountPlan,
         Number = GenerateAccountNumber(_passiveIndividualAccountNumber, client.Number, ++accountNumber)
       };
 
       var percentAccount = new Account
       {
         OwnerID = clientID,
-        AccountPlanNumber = _passiveIndividualAccountNumber,
+        AccountPlan = accountPlan,
         Number = GenerateAccountNumber(_passiveIndividualAccountNumber, client.Number, ++accountNumber)
       };
 
       _unitOfWork.Accounts.Add(mainAccount);
       _unitOfWork.Accounts.Add(percentAccount);
+
       await _unitOfWork.SaveAsync();
 
       return (mainAccount, percentAccount);
