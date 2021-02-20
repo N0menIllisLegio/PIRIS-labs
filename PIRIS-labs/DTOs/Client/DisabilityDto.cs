@@ -1,4 +1,4 @@
-﻿namespace PIRIS_labs.DTOs.Disability
+﻿namespace PIRIS_labs.DTOs.Client
 {
   public class DisabilityDto
   {

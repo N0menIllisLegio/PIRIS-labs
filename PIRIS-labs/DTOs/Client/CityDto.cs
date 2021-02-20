@@ -1,4 +1,4 @@
-﻿namespace PIRIS_labs.DTOs.City
+﻿namespace PIRIS_labs.DTOs.Client
 {
   public class CityDto
   {

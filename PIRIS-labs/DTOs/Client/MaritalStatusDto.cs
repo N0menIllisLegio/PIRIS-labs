@@ -1,4 +1,4 @@
-﻿namespace PIRIS_labs.DTOs.MaritalStatus
+﻿namespace PIRIS_labs.DTOs.Client
 {
   public class MaritalStatusDto
   {

@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using PIRIS_labs.Data;
-using PIRIS_labs.DTOs.Disability;
+using PIRIS_labs.DTOs.Client;
 
 namespace PIRIS_labs.Services
 {

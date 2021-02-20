@@ -1,11 +1,8 @@
 ﻿using AutoMapper;
 using PIRIS_labs.Data.Entities;
-using PIRIS_labs.DTOs.City;
 using PIRIS_labs.DTOs.Client;
 using PIRIS_labs.DTOs.Deposit;
-using PIRIS_labs.DTOs.Disability;
-using PIRIS_labs.DTOs.MaritalStatus;
-using PIRIS_labs.DTOs.Nationality;
+using PIRIS_labs.DTOs.Transaction;
 
 namespace PIRIS_labs.Helpers
 {

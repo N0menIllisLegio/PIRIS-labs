@@ -1,4 +1,4 @@
-﻿namespace PIRIS_labs.DTOs.Nationality
+﻿namespace PIRIS_labs.DTOs.Client
 {
   public class NationalityDto
   {
