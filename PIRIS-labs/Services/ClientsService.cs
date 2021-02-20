@@ -63,11 +63,17 @@ namespace PIRIS_labs.Services
       return new ResultDto { Success = true };
     }
 
-    public async Task DeleteClient(Guid clientID)
+    public async Task<ResultDto> DeleteClient(Guid clientID)
     {
       var dbclient = await _unitOfWork.Clients.FindAsync(clientID);
       _unitOfWork.Clients.Remove(dbclient);
-      await _unitOfWork.SaveAsync();
+      var result = new ResultDto
+      {
+        Success = await _unitOfWork.SaveAsync(),
+        Message = "Remove all client's accounts, deposits etc. to delete him"
+      };
+
+      return result;
     }
 
     private async Task<bool> CheckUniqueness(ClientDto client, Guid? id = null)

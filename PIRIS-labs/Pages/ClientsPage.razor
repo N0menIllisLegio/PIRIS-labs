@@ -2,14 +2,20 @@
 
 @using Services
 @using DTOs.Client
-@inject ClientsService clientsService
+@using Microsoft.Extensions.DependencyInjection
+@using Microsoft.JSInterop
+
+@inject IJSRuntime JSRuntime
+@inject IServiceScopeFactory serviceScopeFactory
+
+@inject IServiceScopeFactory serviceScopeFactory
 @inject NavigationManager NavigationManager
 
 <div class="container-fluid">
-  <h1 class="m-5">Clients</h1>
+  <div class="d-flex justify-content-between m-5">
+    <h1>Clients</h1>
 
-  <div class="d-flex justify-content-end fixed-bottom">
-    <NavLink class="btn-lg btn-success m-5 p-3" href="@link" Match="NavLinkMatch.All">
+    <NavLink class="btn-lg btn-success p-3" href="@link" Match="NavLinkMatch.All">
       Add new client
     </NavLink>
   </div>
@@ -64,12 +70,23 @@
       </blockquote>
     }
   </div>
+
+  <div class="toast alert alert-danger m-5" style="position: absolute; bottom: 0; right: 0;" data-delay="3500">
+    <div class="toast-header">
+      <strong class="mr-auto">Error!</strong>
+      <small>@(DateTime.Now.ToShortTimeString())</small>
+    </div>
+    <div class="toast-body">
+      @Result.Message
+    </div>
+  </div>
 </div>
 
 @code
 {
-  private IReadOnlyList<ClientDto> _clients;
+  private List<ClientDto> _clients;
   private string link = $"/client/edit";
+  private DTOs.ResultDto Result = new DTOs.ResultDto { Success = true };
 
   protected override async Task OnInitializedAsync()
   {
@@ -79,6 +96,8 @@
 
   private async Task RefreshClientsTable()
   {
+    using var scope = serviceScopeFactory.CreateScope();
+    var clientsService = scope.ServiceProvider.GetService<ClientsService>();
     _clients = (await clientsService.GetClientsAsync()).ToList();
   }
 
@@ -94,7 +113,18 @@
 
   private async Task DeleteClient(Guid clientID)
   {
-    await clientsService.DeleteClient(clientID);
-    await RefreshClientsTable();
+    using var scope = serviceScopeFactory.CreateScope();
+    var clientsService = scope.ServiceProvider.GetService<ClientsService>();
+    Result = await clientsService.DeleteClient(clientID);
+
+    if (Result.Success)
+    {
+      var client = _clients.First(client => client.ID == clientID);
+      _clients.Remove(client);
+    }
+    else
+    {
+      await JSRuntime.InvokeVoidAsync("ShowToast", ".toast");
+    }
   }
 }

@@ -73,7 +73,7 @@
     }
   </div>
 
-  <div class="toast m-5" style="position: absolute; bottom: 0; right: 0;" data-delay="3500">
+  <div class="toast alert alert-success m-5" style="position: absolute; bottom: 0; right: 0;" data-delay="3500">
     <div class="toast-header">
       <strong class="mr-auto">Day closed</strong>
       <small>@(DateTime.Now.ToShortTimeString())</small>
@@ -109,12 +109,11 @@
     using var scope = serviceScopeFactory.CreateScope();
     var bankOperationsService = scope.ServiceProvider.GetService<BankOperationsService>();
 
-    await JSRuntime.InvokeVoidAsync("ShowToast", ".toast");
-
-    //Result = await bankOperationsService.CloseDayAsync();
+    Result = await bankOperationsService.CloseDayAsync();
 
     if (Result.Success)
     {
+      await JSRuntime.InvokeVoidAsync("ShowToast", ".toast");
       await RefreshTable();
     }
   }
