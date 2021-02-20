@@ -10,7 +10,7 @@ namespace PIRIS_labs.Data.Entities
     public Guid ID { get; set; }
 
     public decimal Amount { get; set; }
-    public DateTime TransactionDay { get; set; }
+    public DateTime TransactionTime { get; set; }
 
     [Required]
     public virtual Account TransferToAccount { get; set; }
