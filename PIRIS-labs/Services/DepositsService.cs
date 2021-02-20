@@ -29,10 +29,10 @@ namespace PIRIS_labs.Services
 
     public async Task<List<DepositDto>> GetDepositsAsync()
     {
-      var deposits = await _unitOfWork.Deposits.GetAllAsync(deposit => deposit
-      .Include(p => p.PercentAccount)
-      .Include(p => p.Client)
-      .Include(p => p.DepositPlan));
+      var deposits = await _unitOfWork.Deposits.GetOrderedDepositsAsync(deposit => deposit
+        .Include(p => p.PercentAccount)
+        .Include(p => p.Client)
+        .Include(p => p.DepositPlan));
 
       return deposits.Select(_mapper.Map<DepositDto>).ToList();
     }
@@ -69,6 +69,54 @@ namespace PIRIS_labs.Services
           await _transactionsService.CreateTransaction(mainAccount, developmentFundAccount, amount);
 
           _unitOfWork.Deposits.Add(deposit);
+          await _unitOfWork.SaveAsync();
+
+          await transaction.CommitAsync();
+
+          return new ResultDto { Success = true };
+        }
+        catch (Exception ex)
+        {
+          await transaction.RollbackAsync();
+          return new ResultDto { Success = false, Message = ex.Message };
+        }
+      }
+    }
+
+    public async Task<ResultDto> CloseDepositAsync(Guid depositID)
+    {
+      using (var transaction = _unitOfWork.BeginTransaction())
+      {
+        try
+        {
+          var deposit = await _unitOfWork.Deposits.FindAsync(depositID);
+
+          if (deposit is null)
+          {
+            return new ResultDto { Success = false, Message = "Deposit Not Found" };
+          }
+
+          var clientMainAccount = deposit.MainAccount;
+          var clientPercentAccount = deposit.PercentAccount;
+          var cashboxAccount = await _unitOfWork.Accounts.GetBankCashboxAccount();
+          var developmentFundAccount = await _unitOfWork.Accounts.GetBankDevelopmentFundAccount();
+          decimal depositAmount = deposit.Amount;
+          decimal depositPercentsAmount = clientPercentAccount.Balance;
+
+          await _transactionsService.CreateTransaction(developmentFundAccount, clientMainAccount, depositAmount);
+          await _transactionsService.CreateTransaction(clientMainAccount, cashboxAccount, depositAmount);
+
+          cashboxAccount.CreditValue += depositAmount;
+
+          if (depositPercentsAmount > 0)
+          {
+            await _transactionsService.CreateTransaction(clientPercentAccount, cashboxAccount, depositPercentsAmount);
+
+            cashboxAccount.CreditValue += depositPercentsAmount;
+          }
+
+          deposit.Closed = true;
+
           await _unitOfWork.SaveAsync();
 
           await transaction.CommitAsync();

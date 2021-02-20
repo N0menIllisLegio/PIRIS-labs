@@ -79,20 +79,31 @@
           <tr>
             <th scope="col">Deposit Plan</th>
             <th scope="col">Client</th>
+            <th scope="col">End Date</th>
             <th scope="col">Amount</th>
             <th scope="col">Accumulated Amount</th>
+            <th scope="col">Close Deposit</th>
           </tr>
         </thead>
 
         <tbody>
           @foreach (var deposit in _deposits)
           {
-            <tr class="pointerCursor">
-              <th scope="row">@deposit.DepositPlan</th>
-              <td>@deposit.Client</td>
-              <td>@deposit.Amount</td>
-              <td>@deposit.AccumulatedAmount</td>
-            </tr>
+          <tr class="@(deposit.Closed ? "alert alert-secondary" : String.Empty)">
+            <th scope="row">@deposit.DepositPlan</th>
+            <td>@deposit.Client</td>
+            <td>@deposit.EndDate.ToShortDateString()</td>
+            <td>@deposit.Amount</td>
+            <td>@deposit.AccumulatedAmount</td>
+            @if (!deposit.Closed && deposit.Revocable)
+            {
+              <td class="pointerCursor alert alert-danger" @onclick="@(() => CloseDeposit(deposit))" @onclick:preventDefault><span class="fa fa-window-close"/></td>
+            }
+            else
+            {
+              <td>—</td>
+            }
+          </tr>
           }
         </tbody>
       </table>
@@ -117,7 +128,7 @@
 
 @code
 {
-  private IReadOnlyList<DepositDto> _deposits;
+  private List<DepositDto> _deposits;
   private IReadOnlyList<DepositPlanDto> _depositPlans;
   private string linkDepositEdit = $"/deposit/edit";
   private string linkDepositPlanEdit = $"/deposit-plan/edit";
@@ -136,5 +147,17 @@
 
     _depositPlans = await depositPlansService.GetDepositPlansAsync();
     _deposits = await depositsService.GetDepositsAsync();
+  }
+
+  private async Task CloseDeposit(DepositDto deposit)
+  {
+    using var scope = serviceScopeFactory.CreateScope();
+    var depositsService = scope.ServiceProvider.GetService<DepositsService>();
+    var result = await depositsService.CloseDepositAsync(deposit.ID);
+
+    if (result.Success)
+    {
+      deposit.Closed = true;
+    }
   }
 }
