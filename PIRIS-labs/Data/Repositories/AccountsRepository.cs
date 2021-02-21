@@ -39,5 +39,15 @@ namespace PIRIS_labs.Data.Repositories
     {
       return await DbSet.FindAsync("1010000010027");
     }
+
+    public async Task<List<Account>> GetDepositAccounts()
+    {
+      return await GetAllByWhereAsync(accounts => accounts.AccountPlanNumber == "3014");
+    }
+
+    public async Task<List<Account>> GetCreditAccounts()
+    {
+      return await GetAllByWhereAsync(accounts => accounts.AccountPlanNumber == "2400");
+    }
   }
 }

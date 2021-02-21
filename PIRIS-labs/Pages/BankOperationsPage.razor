@@ -73,7 +73,100 @@
     }
   </div>
 
-  <div class="toast alert alert-success m-5" style="position: absolute; bottom: 0; right: 0;" data-delay="3500">
+  <h1 class="m-5">Deposit Accounts</h1>
+  <div>
+    @if (_depositAccounts is not null && _depositAccounts.Count > 0)
+    {
+      <table class="table table-bordered table-hover mb-5">
+        <thead class="thead-dark">
+          <tr>
+            <th scope="col">Number</th>
+            <th scope="col">Name</th>
+            <th scope="col">Debit</th>
+            <th scope="col">Credit</th>
+            <th scope="col">Balance</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @foreach (var account in _depositAccounts)
+          {
+            <tr>
+              <th scope="row">@account.Number</th>
+              <td>@account.AccountPlanName</td>
+              <td>@account.DebitValue</td>
+              <td>@account.CreditValue</td>
+              <td>@account.Balance</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+    else if (_depositAccounts is null)
+    {
+      <div class="d-flex justify-content-center m-5">
+        <div class="spinner-border" role="status">
+          <span class="sr-only">Loading...</span>
+        </div>
+      </div>
+    }
+    else
+    {
+      <blockquote class="blockquote m-5">
+        <p class="mb-0">There are no bank's accounts in your bank...</p>
+        <footer class="blockquote-footer"><cite>I recommend you to add them.</cite></footer>
+      </blockquote>
+    }
+  </div>
+
+  <h1 class="m-5">Credit Accounts</h1>
+
+  <div>
+    @if (_creditAccounts is not null && _creditAccounts.Count > 0)
+    {
+      <table class="table table-bordered table-hover mb-5">
+        <thead class="thead-dark">
+          <tr>
+            <th scope="col">Number</th>
+            <th scope="col">Name</th>
+            <th scope="col">Debit</th>
+            <th scope="col">Credit</th>
+            <th scope="col">Balance</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @foreach (var account in _creditAccounts)
+          {
+            <tr>
+              <th scope="row">@account.Number</th>
+              <td>@account.AccountPlanName</td>
+              <td>@account.DebitValue</td>
+              <td>@account.CreditValue</td>
+              <td>@account.Balance</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+    else if (_creditAccounts is null)
+    {
+      <div class="d-flex justify-content-center m-5">
+        <div class="spinner-border" role="status">
+          <span class="sr-only">Loading...</span>
+        </div>
+      </div>
+    }
+    else
+    {
+      <blockquote class="blockquote m-5">
+        <p class="mb-0">There are no bank's accounts in your bank...</p>
+        <footer class="blockquote-footer"><cite>I recommend you to add them.</cite></footer>
+      </blockquote>
+    }
+  </div>
+
+  <div class="toast alert alert-success m-5" style="position: fixed; bottom: 0; right: 0;" data-delay="3500">
     <div class="toast-header">
       <strong class="mr-auto">Day closed</strong>
       <small>@(DateTime.Now.ToShortTimeString())</small>
@@ -87,6 +180,8 @@
 @code
 {
   private IReadOnlyList<AccountDto> _bankAccounts = null;
+  private IReadOnlyList<AccountDto> _depositAccounts = null;
+  private IReadOnlyList<AccountDto> _creditAccounts = null;
   private bool Spinner = false;
   private DTOs.ResultDto Result = new DTOs.ResultDto { Success = true };
 
@@ -102,6 +197,8 @@
     var accountsService = scope.ServiceProvider.GetService<AccountsService>();
 
     _bankAccounts = await accountsService.GetBankAccountsAsync();
+    _depositAccounts = await accountsService.GetDepositAccountsAsync();
+    _creditAccounts = await accountsService.GetCreditAccountsAsync();
   }
 
   private async Task CloseBankDay()

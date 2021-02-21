@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using PIRIS_labs.Data;
@@ -28,6 +29,20 @@ namespace PIRIS_labs.Services
       var fundAccount = await _unitOfWork.Accounts.GetBankDevelopmentFundAccount();
 
       return new List<AccountDto> { _mapper.Map<AccountDto>(cashboxAccount), _mapper.Map<AccountDto>(fundAccount) };
+    }
+
+    public async Task<List<AccountDto>> GetDepositAccountsAsync()
+    {
+      var depositAccounts = await _unitOfWork.Accounts.GetDepositAccounts();
+
+      return depositAccounts.Select(_mapper.Map<AccountDto>).ToList();
+    }
+
+    public async Task<List<AccountDto>> GetCreditAccountsAsync()
+    {
+      var creditAccounts = await _unitOfWork.Accounts.GetCreditAccounts();
+
+      return creditAccounts.Select(_mapper.Map<AccountDto>).ToList();
     }
 
     public async Task CalculateAccountsBalances()
