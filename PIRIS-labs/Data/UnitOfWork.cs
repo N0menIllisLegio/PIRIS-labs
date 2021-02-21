@@ -8,6 +8,8 @@ namespace PIRIS_labs.Data
   public class UnitOfWork: IDisposable
   {
     private readonly ApplicationDbContext _applicationDbContext;
+    private bool _disposed = false;
+
     private ClientsRepository _clientsRepository;
     private CitiesRepository _citiesRepository;
     private DisabilitiesRepository _disabilitiesRepository;
@@ -16,10 +18,13 @@ namespace PIRIS_labs.Data
 
     private AccountsRepository _accountsRepository;
     private AccountPlansRepository _accountPlansRepository;
+    private TransactionsRepository _transactionsRepository;
+
     private DepositsRepository _depositsRepository;
     private DepositPlansRepository _depositPlansRepository;
-    private TransactionsRepository _transactionsRepository;
-    private bool _disposed = false;
+
+    private CreditsRepository _creditsRepository;
+    private CreditPlansRepository _creditPlansRepository;
 
     public UnitOfWork(ApplicationDbContext applicationDbContext)
     {
@@ -33,9 +38,11 @@ namespace PIRIS_labs.Data
     public NationalitiesRepository Nationalities => _nationalitiesRepository = _nationalitiesRepository ?? new NationalitiesRepository(_applicationDbContext);
     public AccountsRepository Accounts => _accountsRepository = _accountsRepository ?? new AccountsRepository(_applicationDbContext);
     public AccountPlansRepository AccountPlans => _accountPlansRepository = _accountPlansRepository ?? new AccountPlansRepository(_applicationDbContext);
+    public TransactionsRepository Transactions => _transactionsRepository = _transactionsRepository ?? new TransactionsRepository(_applicationDbContext);
     public DepositsRepository Deposits => _depositsRepository = _depositsRepository ?? new DepositsRepository(_applicationDbContext);
     public DepositPlansRepository DepositPlans => _depositPlansRepository = _depositPlansRepository ?? new DepositPlansRepository(_applicationDbContext);
-    public TransactionsRepository Transactions => _transactionsRepository = _transactionsRepository ?? new TransactionsRepository(_applicationDbContext);
+    public CreditsRepository Credits => _creditsRepository = _creditsRepository ?? new CreditsRepository(_applicationDbContext);
+    public CreditPlansRepository CreditPlans => _creditPlansRepository = _creditPlansRepository ?? new CreditPlansRepository(_applicationDbContext);
 
     public async Task<bool> SaveAsync()
     {
