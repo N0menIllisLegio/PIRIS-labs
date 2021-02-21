@@ -11,6 +11,7 @@ namespace PIRIS_labs.Services
   public class AccountsService
   {
     private const string _passiveIndividualAccountNumber = "3014";
+    private const string _activeIndividualAccountNumber = "2400";
 
     private readonly UnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
@@ -71,6 +72,34 @@ namespace PIRIS_labs.Services
         OwnerID = clientID,
         AccountPlan = accountPlan,
         Number = GenerateAccountNumber(_passiveIndividualAccountNumber, client.Number, ++accountNumber)
+      };
+
+      _unitOfWork.Accounts.Add(mainAccount);
+      _unitOfWork.Accounts.Add(percentAccount);
+
+      await _unitOfWork.SaveAsync();
+
+      return (mainAccount, percentAccount);
+    }
+
+    public async Task<(Account main, Account percent)> OpenCreditAccountsAsync(Guid clientID)
+    {
+      var client = await _unitOfWork.Clients.FindAsync(clientID);
+      int accountNumber = _unitOfWork.Accounts.GetClientsLastAccountNumber(clientID);
+      var accountPlan = await _unitOfWork.AccountPlans.FindAsync(_activeIndividualAccountNumber);
+
+      var mainAccount = new Account
+      {
+        OwnerID = clientID,
+        AccountPlan = accountPlan,
+        Number = GenerateAccountNumber(_activeIndividualAccountNumber, client.Number, ++accountNumber)
+      };
+
+      var percentAccount = new Account
+      {
+        OwnerID = clientID,
+        AccountPlan = accountPlan,
+        Number = GenerateAccountNumber(_activeIndividualAccountNumber, client.Number, ++accountNumber)
       };
 
       _unitOfWork.Accounts.Add(mainAccount);
