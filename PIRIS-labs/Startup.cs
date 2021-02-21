@@ -42,6 +42,8 @@ namespace PIRIS_labs
       services.AddScoped<AccountsService>();
       services.AddScoped<TransactionsService>();
       services.AddScoped<BankOperationsService>();
+      services.AddScoped<CreditPlansService>();
+      services.AddScoped<CreditsService>();
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceScopeFactory serviceScopeFactory)
