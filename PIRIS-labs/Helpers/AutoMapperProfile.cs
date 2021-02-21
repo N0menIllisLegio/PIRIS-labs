@@ -29,6 +29,12 @@ namespace PIRIS_labs.Helpers
         .ForMember(dest => dest.AccumulatedAmount, opt => opt.MapFrom(src => src.PercentAccount.Balance));
 
       CreateMap<CreditPlan, CreditPlanDto>().ReverseMap();
+
+      CreateMap<Credit, CreditDto>()
+        .ForMember(dest => dest.CreditPlan, opt => opt.MapFrom(src => src.CreditPlan.Name))
+        .ForMember(dest => dest.Anuity, opt => opt.MapFrom(src => src.CreditPlan.Anuity))
+        .ForMember(dest => dest.Client, opt => opt.MapFrom(src => $"{src.Client.Surname} {src.Client.Name} {src.Client.Patronymic}"))
+        .ForMember(dest => dest.MonthlyPayment, opt => opt.MapFrom(src => src.PercentAccount.Balance));
     }
   }
 }

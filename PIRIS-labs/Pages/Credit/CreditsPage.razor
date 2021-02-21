@@ -33,23 +33,23 @@
         <tbody>
           @foreach (var creditPlan in _creditPlans)
           {
-          <tr>
-            <th scope="row">@creditPlan.Name</th>
-            <td>@creditPlan.MonthPeriod</td>
-            <td>@creditPlan.Percent</td>
-            <td>
-              @if (creditPlan.MinAmount is not null)
-              {<div>@creditPlan.MinAmount</div>}
+            <tr>
+              <th scope="row">@creditPlan.Name</th>
+              <td>@creditPlan.MonthPeriod</td>
+              <td>@creditPlan.Percent</td>
+              <td>
+                @if (creditPlan.MinAmount is not null)
+                {<div>@creditPlan.MinAmount</div>}
               else
               {<div>—</div>}
-            </td>
-            <td>
-              @if (creditPlan.Anuity)
-              {<div>Yes</div>}
-              else
-              {<div>No</div>}
-            </td>
-          </tr>
+              </td>
+              <td>
+                @if (creditPlan.Anuity)
+                {<div>Yes</div>}
+                else
+                {<div>No</div>}
+              </td>
+            </tr>
           }
         </tbody>
       </table>
@@ -71,12 +71,75 @@
     }
   </div>
 
+  <div class="d-flex justify-content-between m-5">
+    <h1>Credits</h1>
+    <NavLink class="btn-lg btn-success p-3" href="@linkCreditEdit" Match="NavLinkMatch.All">
+      Add new credit
+    </NavLink>
+  </div>
+
+  <div>
+    @if (_credits is not null && _credits.Count > 0)
+    {
+      <table class="table table-bordered table-hover mb-5">
+        <thead class="thead-dark">
+          <tr>
+            <th scope="col">Deposit Plan</th>
+            <th scope="col">Client</th>
+            <th scope="col">End Date</th>
+            <th scope="col">Amount</th>
+            <th scope="col">Accumulated Amount</th>
+            <th scope="col">Close Deposit</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @foreach (var credit in _credits)
+          {
+            <tr class="@(credit.Closed ? "alert alert-secondary" : String.Empty)">
+              <th scope="row">@credit.CreditPlan</th>
+              <td>@credit.Client</td>
+              <td>@credit.EndDate.ToShortDateString()</td>
+              <td>@credit.Amount</td>
+              @if (!credit.Closed)
+              {
+                <td>@credit.MonthlyPayment</td>
+                <td class="pointerCursor alert alert-danger" @onclick="@(() => CloseCredit(credit))" @onclick:preventDefault><span class="fa fa-window-close" /></td>
+              }
+              else
+              {
+                <td>—</td>
+                <td>—</td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+    else if (_credits is null)
+    {
+      <div class="d-flex justify-content-center m-5">
+        <div class="spinner-border" role="status">
+          <span class="sr-only">Loading...</span>
+        </div>
+      </div>
+    }
+    else
+    {
+      <blockquote class="blockquote m-5">
+        <p class="mb-0">There are no deposit plans here.</p>
+        <footer class="blockquote-footer"><cite>Add first</cite></footer>
+      </blockquote>
+    }
+  </div>
 </div>
 
 @code
 {
+  private List<CreditDto> _credits;
   private IReadOnlyList<CreditPlanDto> _creditPlans;
   private string linkCreditPlanEdit = $"/credit-plan/edit";
+  private string linkCreditEdit = $"/credit/edit";
 
   protected override async Task OnInitializedAsync()
   {
@@ -87,9 +150,15 @@
   private async Task RefreshDepositsTables()
   {
     using var scope = serviceScopeFactory.CreateScope();
-    var depositPlansService = scope.ServiceProvider.GetService<CreditPlansService>();
+    var creditPlansService = scope.ServiceProvider.GetService<CreditPlansService>();
+    var creditsService = scope.ServiceProvider.GetService<CreditsService>();
 
-    _creditPlans = await depositPlansService.GetCreditPlansAsync();
+    _creditPlans = await creditPlansService.GetCreditPlansAsync();
+    _credits = await creditsService.GetCreditsAsync();
   }
 
+  private Task CloseCredit(CreditDto credit)
+  {
+    return Task.CompletedTask;
+  }
 }
