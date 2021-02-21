@@ -14,7 +14,10 @@ namespace PIRIS_labs.Data
       SeedMaritalStatuses(builder.Entity<MaritalStatus>());
       SeedNationalities(builder.Entity<Nationality>());
       SeedDisabilities(builder.Entity<Disability>());
-      SeedAccountAndDeposit(builder);
+      SeedDepositPlans(builder.Entity<DepositPlan>());
+      SeedCreditPlans(builder.Entity<CreditPlan>());
+      SeedCurrency(builder.Entity<Currency>());
+      SeedAccounts(builder);
     }
 
     public static void SeedCities(EntityTypeBuilder<City> cityBuilder)
@@ -73,13 +76,39 @@ namespace PIRIS_labs.Data
       disabilityBuilder.HasData(new Disability { Name = "Grade 3" });
     }
 
-    public static void SeedAccountAndDeposit(ModelBuilder builder)
+    public static void SeedDepositPlans(EntityTypeBuilder<DepositPlan> depositPlanBuilder)
+    {
+      depositPlanBuilder.HasData(new DepositPlan { ID = Guid.Parse("D8FFAF98-6DCB-4310-A76D-39D0A2B7ED48"), Name = "Standard", DayPeriod = 20, Percent = 0.01m, Revocable = true });
+      depositPlanBuilder.HasData(new DepositPlan { ID = Guid.Parse("979F2C2E-F263-43B3-ACA6-800FA0A3668F"), Name = "Standard+", DayPeriod = 40, Percent = 0.05m, Revocable = false });
+      depositPlanBuilder.HasData(new DepositPlan { ID = Guid.Parse("464FE5A5-1621-4078-9258-CC6D9BCA5147"), Name = "Medium", DayPeriod = 100, Percent = 0.1m, Revocable = false });
+      depositPlanBuilder.HasData(new DepositPlan { ID = Guid.Parse("5125376B-1FB8-4E1D-80EE-DF7A5504CF9B"), Name = "Ultra", DayPeriod = 220, Percent = 0.4m, Revocable = true });
+    }
+
+    public static void SeedCreditPlans(EntityTypeBuilder<CreditPlan> creditPlanBuilder)
+    {
+      creditPlanBuilder.HasData(new CreditPlan { ID = Guid.Parse("A64F6381-32B4-423E-B9DD-498418DDE886"), Name = "Standard", MonthPeriod = 60, Percent = 11.25m, Anuity = true, MinAmount = 100 });
+      creditPlanBuilder.HasData(new CreditPlan { ID = Guid.Parse("8904C876-7C2A-40C3-B5D9-B5BF0CB3C0BE"), Name = "Standard+", MonthPeriod = 80, Percent = 13.33m, Anuity = false, MinAmount = null });
+      creditPlanBuilder.HasData(new CreditPlan { ID = Guid.Parse("D228A00E-CC18-457D-90BA-184D229A333C"), Name = "Medium", MonthPeriod = 120, Percent = 8.75m, Anuity = false, MinAmount = 10_000_000 });
+      creditPlanBuilder.HasData(new CreditPlan { ID = Guid.Parse("AB981561-FB5E-4CE3-A965-95A6DE19A85B"), Name = "Ultra", MonthPeriod = 120, Percent = 21.0m, Anuity = true, MinAmount = null });
+    }
+
+    public static void SeedCurrency(EntityTypeBuilder<Currency> currencyBuilder)
+    {
+      currencyBuilder.HasData(new Currency { Name = "Czech koruna", Code = "CZK", Symbol = "Kč" });
+      currencyBuilder.HasData(new Currency { Name = "Euro", Code = "EUR", Symbol = "€" });
+      currencyBuilder.HasData(new Currency { Name = "Pounds sterling", Code = "GBP", Symbol = "£" });
+      currencyBuilder.HasData(new Currency { Name = "Russian ruble", Code = "RUB", Symbol = "₽" });
+      currencyBuilder.HasData(new Currency { Name = "Polish zloty", Code = "PLN", Symbol = "zł" });
+      currencyBuilder.HasData(new Currency { Name = "US dollar", Code = "USD", Symbol = "$" });
+      currencyBuilder.HasData(new Currency { Name = "Belarusian ruble", Code = "BYR", Symbol = "Br" });
+    }
+
+    public static void SeedAccounts(ModelBuilder builder)
     {
       var accountPlanBuilder = builder.Entity<AccountPlan>();
-      var depositPlanBuilder = builder.Entity<DepositPlan>();
-
       var bankFundaccountPlan = new AccountPlan { Number = "7327", Name = "Bank Development Fund account", Type = AccountType.Passive };
       var bankCashboxAccountPlan = new AccountPlan { Number = "1010", Name = "Bank cashbox account", Type = AccountType.Active };
+
       accountPlanBuilder.HasData(new AccountPlan { Number = "3014", Name = "Passive account for Individuals", Type = AccountType.Passive });
       accountPlanBuilder.HasData(new AccountPlan { Number = "2400", Name = "Active account for Individuals", Type = AccountType.Active });
       accountPlanBuilder.HasData(bankCashboxAccountPlan);
@@ -129,11 +158,6 @@ namespace PIRIS_labs.Data
         Number = $"{bankCashboxAccountPlan.Number}00001{++bankOwnersAccountsNumber:000}7", // 00001 - bankOwner.Number, but its generates in DB
         OwnerID = bankOwner.ID
       });
-
-      depositPlanBuilder.HasData(new DepositPlan { ID = Guid.Parse("D8FFAF98-6DCB-4310-A76D-39D0A2B7ED48"), Name = "Standard", DayPeriod = 20, Percent = 0.01m, Revocable = true });
-      depositPlanBuilder.HasData(new DepositPlan { ID = Guid.Parse("979F2C2E-F263-43B3-ACA6-800FA0A3668F"), Name = "Standard+", DayPeriod = 40, Percent = 0.05m, Revocable = false });
-      depositPlanBuilder.HasData(new DepositPlan { ID = Guid.Parse("464FE5A5-1621-4078-9258-CC6D9BCA5147"), Name = "Medium", DayPeriod = 100, Percent = 0.1m, Revocable = false });
-      depositPlanBuilder.HasData(new DepositPlan { ID = Guid.Parse("5125376B-1FB8-4E1D-80EE-DF7A5504CF9B"), Name = "Ultra", DayPeriod = 220, Percent = 0.4m, Revocable = true });
     }
   }
 }

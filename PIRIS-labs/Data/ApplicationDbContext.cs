@@ -7,8 +7,7 @@ namespace PIRIS_labs.Data
   {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)
-    {
-    }
+    { }
 
     public DbSet<Disability> Disabilities { get; set; }
     public DbSet<Nationality> Nationalities { get; set; }
@@ -16,11 +15,15 @@ namespace PIRIS_labs.Data
     public DbSet<City> Cities { get; set; }
     public DbSet<Client> Clients { get; set; }
 
-    public DbSet<Transaction> Transactions { get; set; }
-    public DbSet<Deposit> Deposits { get; set; }
     public DbSet<Account> Accounts { get; set; }
     public DbSet<AccountPlan> AccountPlans { get; set; }
+    public DbSet<Transaction> Transactions { get; set; }
+
+    public DbSet<Deposit> Deposits { get; set; }
     public DbSet<DepositPlan> DepositPlans { get; set; }
+
+    public DbSet<Credit> Credits { get; set; }
+    public DbSet<CreditPlan> CreditPlans { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
