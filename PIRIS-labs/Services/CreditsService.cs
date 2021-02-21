@@ -89,7 +89,65 @@ namespace PIRIS_labs.Services
       }
     }
 
-    public List<CreditPercentsDto> CalculateCreditPaymentPlan(decimal creditAmount, decimal yearPercent, int months, bool anuity)
+    public async Task<ResultDto> CloseCreditAsync(Guid creditID)
+    {
+      using (var transaction = _unitOfWork.BeginTransaction())
+      {
+        try
+        {
+          var credit = await _unitOfWork.Credits.FindAsync(creditID);
+
+          if (credit is null)
+          {
+            return new ResultDto { Success = false, Message = "Deposit Not Found" };
+          }
+
+          var clientMainAccount = credit.MainAccount;
+          var clientPercentAccount = credit.PercentAccount;
+          var cashboxAccount = await _unitOfWork.Accounts.GetBankCashboxAccount();
+          var developmentFundAccount = await _unitOfWork.Accounts.GetBankDevelopmentFundAccount();
+
+          if (clientPercentAccount.Balance < 0)
+          {
+            decimal percentDebth = Math.Abs(clientPercentAccount.Balance);
+            cashboxAccount.DebitValue += percentDebth;
+            await _transactionsService.CreateTransaction(cashboxAccount, clientPercentAccount, percentDebth);
+          }
+
+          decimal creditDebthAmount = CalculateCreditDebthAmount(credit);
+          if (creditDebthAmount > 0)
+          {
+            cashboxAccount.DebitValue += creditDebthAmount;
+            await _transactionsService.CreateTransaction(cashboxAccount, clientMainAccount, creditDebthAmount);
+            await _transactionsService.CreateTransaction(clientMainAccount, developmentFundAccount, creditDebthAmount);
+          }
+
+          credit.Closed = true;
+
+          await _unitOfWork.SaveAsync();
+
+          await transaction.CommitAsync();
+
+          return new ResultDto { Success = true };
+        }
+        catch (Exception ex)
+        {
+          await transaction.RollbackAsync();
+          return new ResultDto { Success = false, Message = ex.Message };
+        }
+      }
+    }
+
+    private decimal CalculateCreditDebthAmount(Credit credit)
+    {
+      var creditPlan = credit.CreditPlan;
+      var creditPaymentPlan = CalculateCreditPaymentPlan(credit.Amount, creditPlan.Percent, creditPlan.MonthPeriod, creditPlan.Anuity, credit.StartDate);
+
+      return creditPaymentPlan.Aggregate(0m, (debth, nextPayment) => nextPayment.Date >= DateTime.Today ? debth += nextPayment.PaymentSum : debth);
+    }
+
+    public List<CreditPercentsDto> CalculateCreditPaymentPlan(decimal creditAmount, decimal yearPercent, int months, bool anuity,
+      DateTime startDate)
     {
       var result = new List<CreditPercentsDto>();
       decimal mainDebth;
@@ -114,7 +172,7 @@ namespace PIRIS_labs.Services
         result.Add(new CreditPercentsDto
         {
           RowNumber = monthsPassed + 1,
-          Date = DateTime.Today.AddMonths(monthsPassed),
+          Date = startDate.AddMonths(monthsPassed),
           MainDebth = Math.Round(mainDebth, 2),
           PercentDebth = Math.Round(percentDebth, 2),
           PaymentSum = Math.Round(mainDebth + percentDebth, 2)

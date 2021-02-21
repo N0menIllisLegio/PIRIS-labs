@@ -241,7 +241,7 @@
         using var scope = serviceScopeFactory.CreateScope();
         var creditsSerivce = scope.ServiceProvider.GetService<CreditsService>();
         _creditPercents = creditsSerivce.CalculateCreditPaymentPlan(_createCreditDto.Amount, creditPlan.Percent,
-          creditPlan.MonthPeriod, creditPlan.Anuity);
+          creditPlan.MonthPeriod, creditPlan.Anuity, DateTime.Today);
 
         CalculatingPercents = false;
       }

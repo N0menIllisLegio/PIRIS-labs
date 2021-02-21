@@ -84,12 +84,12 @@
       <table class="table table-bordered table-hover mb-5">
         <thead class="thead-dark">
           <tr>
-            <th scope="col">Deposit Plan</th>
+            <th scope="col">Credit Plan</th>
             <th scope="col">Client</th>
             <th scope="col">End Date</th>
             <th scope="col">Amount</th>
-            <th scope="col">Accumulated Amount</th>
-            <th scope="col">Close Deposit</th>
+            <th scope="col">Debth</th>
+            <th scope="col">Close Credit</th>
           </tr>
         </thead>
 
@@ -157,8 +157,15 @@
     _credits = await creditsService.GetCreditsAsync();
   }
 
-  private Task CloseCredit(CreditDto credit)
+  private async Task CloseCredit(CreditDto credit)
   {
-    return Task.CompletedTask;
+    using var scope = serviceScopeFactory.CreateScope();
+    var creditsService = scope.ServiceProvider.GetService<CreditsService>();
+    var result = await creditsService.CloseCreditAsync(credit.ID);
+
+    if (result.Success)
+    {
+      credit.Closed = true;
+    }
   }
 }
