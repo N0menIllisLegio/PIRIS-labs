@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 using PIRIS_labs.Data.Entities;
+using PIRIS_labs.DTOs.Credit;
 
 namespace PIRIS_labs.Data.Repositories
 {
@@ -30,6 +31,27 @@ namespace PIRIS_labs.Data.Repositories
       }
 
       return await query.OrderBy(credit => credit.Closed).ToListAsync();
+    }
+
+    public async Task<List<CreditPercentAccountDto>> GetOpenCreditPercentAccounts()
+    {
+      var query = DbSet.Join(ApplicationDbContext.Accounts,
+        credit => credit.PercentAccountNumber,
+        account => account.Number,
+        (credit, account) => new { credit, account })
+        .Where(result => !result.credit.Closed)
+        .Join(ApplicationDbContext.CreditPlans, firstJoinResult => firstJoinResult.credit.CreditPlanID, creditPlan => creditPlan.ID,
+        (firstJoinResult, creditPlan) => new CreditPercentAccountDto
+        {
+          PercentAccount = firstJoinResult.account,
+          CreditAmount = firstJoinResult.credit.Amount,
+          CreditPercent = creditPlan.Percent,
+          Anuity = creditPlan.Anuity,
+          Months = creditPlan.MonthPeriod,
+          StartDate = firstJoinResult.credit.StartDate
+        });
+
+      return await query.ToListAsync();
     }
   }
 }

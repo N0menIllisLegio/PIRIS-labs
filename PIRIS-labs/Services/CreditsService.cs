@@ -27,6 +27,12 @@ namespace PIRIS_labs.Services
       _transactionsService = transactionsService;
     }
 
+    public static int GetMonthDifference(DateTime startDate, DateTime endDate)
+    {
+      int monthsApart = 12 * (startDate.Year - endDate.Year) + startDate.Month - endDate.Month;
+      return Math.Abs(monthsApart);
+    }
+
     public async Task<List<CreditDto>> GetCreditsAsync()
     {
       var deposits = await _unitOfWork.Credits.GetOrderedCreditsAsync(credit => credit
@@ -116,6 +122,37 @@ namespace PIRIS_labs.Services
       }
 
       return result;
+    }
+
+    public async Task CalculateCreditsPercents()
+    {
+      var creditPercentAccounts = await _unitOfWork.Credits.GetOpenCreditPercentAccounts();
+      var developmentFundAccount = await _unitOfWork.Accounts.GetBankDevelopmentFundAccount();
+
+      foreach (var creditPercentAccount in creditPercentAccounts)
+      {
+        decimal paymentAmount;
+
+        if (creditPercentAccount.Anuity)
+        {
+          double monthPercent = (double)creditPercentAccount.CreditPercent / 12;
+          double mainDebth = monthPercent * Math.Pow(1 + monthPercent, creditPercentAccount.Months) / (Math.Pow(1 + monthPercent, creditPercentAccount.Months) - 1);
+          paymentAmount = creditPercentAccount.CreditAmount * (decimal)mainDebth;
+        }
+        else
+        {
+          int monthsPassed = GetMonthDifference(DateTime.Today, creditPercentAccount.StartDate);
+
+          decimal mainDebth = creditPercentAccount.CreditAmount / creditPercentAccount.Months;
+          decimal percentDebth = (creditPercentAccount.CreditAmount - (mainDebth * monthsPassed)) * creditPercentAccount.CreditPercent / 12;
+          paymentAmount = mainDebth + percentDebth;
+
+          // Here we calculate payment amount in 1 day, not a month
+          paymentAmount /= DateTime.DaysInMonth(DateTime.Today.Year, DateTime.Today.Month);
+        }
+
+        await _transactionsService.CreateTransaction(creditPercentAccount.PercentAccount, developmentFundAccount, paymentAmount);
+      }
     }
   }
 }
