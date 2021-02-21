@@ -1,7 +1,7 @@
 ﻿@page "/credits"
 
 @using Services
-@using DTOs.Deposit
+@using DTOs.Credit
 @using Microsoft.Extensions.DependencyInjection
 
 @inject IServiceScopeFactory serviceScopeFactory
@@ -10,15 +10,86 @@
 
 <div class="container-fluid">
   <div class="d-flex justify-content-between m-5">
-    <h1>Credits</h1>
-    <NavLink class="btn-lg btn-success p-3" href="#" Match="NavLinkMatch.All">
-      Add new credit
+    <h1>Credit Plans</h1>
+    <NavLink class="btn-lg btn-success p-3" href="@linkCreditPlanEdit" Match="NavLinkMatch.All">
+      Add new credit plan
     </NavLink>
+  </div>
+
+  <div>
+    @if (_creditPlans is not null && _creditPlans.Count > 0)
+    {
+      <table class="table table-bordered table-hover">
+        <thead class="thead-dark">
+          <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Period, months</th>
+            <th scope="col">Percent a year, %</th>
+            <th scope="col">Minimum amount</th>
+            <th scope="col">Anuity credit</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @foreach (var creditPlan in _creditPlans)
+          {
+          <tr>
+            <th scope="row">@creditPlan.Name</th>
+            <td>@creditPlan.MonthPeriod</td>
+            <td>@creditPlan.Percent</td>
+            <td>
+              @if (creditPlan.MinAmount is not null)
+              {<div>@creditPlan.MinAmount</div>}
+              else
+              {<div>—</div>}
+            </td>
+            <td>
+              @if (creditPlan.Anuity)
+              {<div>Yes</div>}
+              else
+              {<div>No</div>}
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    }
+    else if (_creditPlans is null)
+    {
+      <div class="d-flex justify-content-center m-5">
+        <div class="spinner-border" role="status">
+          <span class="sr-only">Loading...</span>
+        </div>
+      </div>
+    }
+    else
+    {
+      <blockquote class="blockquote m-5">
+        <p class="mb-0">There are no deposit plans here.</p>
+        <footer class="blockquote-footer"><cite>Add first</cite></footer>
+      </blockquote>
+    }
   </div>
 
 </div>
 
 @code
 {
+  private IReadOnlyList<CreditPlanDto> _creditPlans;
+  private string linkCreditPlanEdit = $"/credit-plan/edit";
+
+  protected override async Task OnInitializedAsync()
+  {
+    await RefreshDepositsTables();
+    await base.OnInitializedAsync();
+  }
+
+  private async Task RefreshDepositsTables()
+  {
+    using var scope = serviceScopeFactory.CreateScope();
+    var depositPlansService = scope.ServiceProvider.GetService<CreditPlansService>();
+
+    _creditPlans = await depositPlansService.GetCreditPlansAsync();
+  }
 
 }
