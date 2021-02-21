@@ -47,8 +47,8 @@
               <td @onclick="@(() => DisplayClientInfo(client.ID))">@client.Patronymic</td>
               <td @onclick="@(() => DisplayClientInfo(client.ID))">@client.Birthday.ToShortDateString()</td>
               <td @onclick="@(() => DisplayClientInfo(client.ID))">@client.Gender</td>
-              <td @onclick="@(() => EditClient(client.ID))" class="bg-warning"><span class="oi oi-pencil" /></td>
-              <td @onclick="@(() => DeleteClient(client.ID))" class="bg-danger"><span class="oi oi-trash" /></td>
+              <td @onclick="@(() => EditClient(client.ID))" class="bg-warning"><span class="fa fa-user-edit" /></td>
+              <td @onclick="@(() => DeleteClient(client.ID))" class="bg-danger"><span class="fa fa-user-slash" /></td>
             </tr>
           }
         </tbody>
