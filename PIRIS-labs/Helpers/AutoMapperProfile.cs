@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using PIRIS_labs.Data.Entities;
+using PIRIS_labs.DTOs.ATM;
 using PIRIS_labs.DTOs.Client;
 using PIRIS_labs.DTOs.Common;
 using PIRIS_labs.DTOs.Credit;
@@ -35,6 +36,10 @@ namespace PIRIS_labs.Helpers
         .ForMember(dest => dest.Anuity, opt => opt.MapFrom(src => src.CreditPlan.Anuity))
         .ForMember(dest => dest.Client, opt => opt.MapFrom(src => $"{src.Client.Surname} {src.Client.Name} {src.Client.Patronymic}"))
         .ForMember(dest => dest.MonthlyPayment, opt => opt.MapFrom(src => src.PercentAccount.Balance));
+
+      CreateMap<CreditCard, CreditCardDto>()
+        .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.EndDate.ToString("MM/yy")))
+        .ForMember(dest => dest.OwnerFullName, opt => opt.MapFrom(src => $"{src.Owner.Name.ToUpper()} {src.Owner.Surname.ToUpper()}"));
     }
   }
 }

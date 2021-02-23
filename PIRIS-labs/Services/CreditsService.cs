@@ -13,18 +13,23 @@ namespace PIRIS_labs.Services
 {
   public class CreditsService
   {
+    private static readonly Random _randomizer = new Random();
+
     private readonly UnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private readonly AccountsService _accountsService;
     private readonly TransactionsService _transactionsService;
+    private readonly CreditCardsService _creditCardsService;
 
     public CreditsService(UnitOfWork unitOfWork, IMapper mapper,
-      AccountsService accountsService, TransactionsService transactionsService)
+      AccountsService accountsService, TransactionsService transactionsService,
+      CreditCardsService creditCardsService)
     {
       _unitOfWork = unitOfWork;
       _mapper = mapper;
       _accountsService = accountsService;
       _transactionsService = transactionsService;
+      _creditCardsService = creditCardsService;
     }
 
     public static int GetMonthDifference(DateTime startDate, DateTime endDate)
@@ -75,6 +80,18 @@ namespace PIRIS_labs.Services
           //cashboxAccount.CreditValue += amount;
 
           _unitOfWork.Credits.Add(credit);
+
+          var creditCard = new CreditCard
+          {
+            CreditAccount = mainAccount,
+            EndDate = credit.EndDate,
+            OwnerID = credit.ClientID,
+
+            PIN = $"{_randomizer.Next(0, 9999):0000}",
+            Number = await _creditCardsService.GenerateCreditCardNumber()
+          };
+
+          _unitOfWork.CreditCards.Add(creditCard);
           await _unitOfWork.SaveAsync();
 
           await transaction.CommitAsync();

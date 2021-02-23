@@ -1,0 +1,56 @@
+﻿@page "/atm"
+
+@using Services
+@using DTOs.ATM
+@using Microsoft.Extensions.DependencyInjection
+
+@inject IServiceScopeFactory serviceScopeFactory
+
+@inject NavigationManager NavigationManager
+
+<div class="container-fluid">
+  <h1 class="m-5">ATM</h1>
+  <div class="row">
+    <div class="col-3">
+      <EditForm Model="@_creditCardDto">
+        <DataAnnotationsValidator />
+        <div class="card">
+          <div class="card-header text-center">
+            Credit card
+          </div>
+          <div class="card-body">
+            <div class="input-group mb-3">
+              <div class="input-group-prepend">
+                <span class="input-group-text" id="basic-addon1">Full Name</span>
+              </div>
+              <InputText class="form-control" @bind-Value="@_creditCardDto.OwnerFullName" disabled />
+            </div>
+            <div class="input-group mb-3">
+              <div class="input-group-prepend">
+                <span class="input-group-text" id="basic-addon1">Credit Card Number</span>
+              </div>
+              <InputText class="form-control" @bind-Value="@_creditCardDto.Number" maxlength="16" />
+            </div>
+            <div class="input-group">
+              <div class="input-group-prepend">
+                <span class="input-group-text" id="basic-addon1">PIN</span>
+              </div>
+              <InputText class="form-control" @bind-Value="@_creditCardDto.PIN" type="password" maxlength="4"/>
+              <InputText class="form-control" @bind-Value="@_creditCardDto.EndDate" disabled />
+            </div>
+          </div>
+          <div class="card-footer text-center p-1">
+            <button type="submit" class="btn btn-link">Submit card</button>
+          </div>
+        </div>
+        <ValidationSummary />
+      </EditForm>
+    </div>
+  </div>
+</div>
+
+@code
+{
+  private CreditCardDto _creditCardDto = new CreditCardDto();
+  private bool CardInserted = false;
+}

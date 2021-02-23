@@ -2,7 +2,11 @@
 
 @using Services
 @using DTOs.Credit
+@using DTOs.ATM
 @using Microsoft.Extensions.DependencyInjection
+@using Microsoft.JSInterop
+
+@inject IJSRuntime JSRuntime
 
 @inject IServiceScopeFactory serviceScopeFactory
 
@@ -89,6 +93,7 @@
             <th scope="col">End Date</th>
             <th scope="col">Amount</th>
             <th scope="col">Debth</th>
+            <th scope="col">Credit Card Info</th>
             <th scope="col">Close Credit</th>
           </tr>
         </thead>
@@ -104,10 +109,14 @@
               @if (!credit.Closed)
               {
                 <td>@credit.MonthlyPayment</td>
+                <td class="pointerCursor alert alert-warning" @onclick="@(() => ShowPopover(credit))" @onclick:preventDefault>
+                  <span class="fa fa-credit-card" id="@credit.ID"/>
+                </td>
                 <td class="pointerCursor alert alert-danger" @onclick="@(() => CloseCredit(credit))" @onclick:preventDefault><span class="fa fa-window-close" /></td>
               }
               else
               {
+                <td>—</td>
                 <td>—</td>
                 <td>—</td>
               }
@@ -138,6 +147,7 @@
 {
   private List<CreditDto> _credits;
   private IReadOnlyList<CreditPlanDto> _creditPlans;
+  private IReadOnlyList<CreditCardDto> _creditCards;
   private string linkCreditPlanEdit = $"/credit-plan/edit";
   private string linkCreditEdit = $"/credit/edit";
 
@@ -152,9 +162,11 @@
     using var scope = serviceScopeFactory.CreateScope();
     var creditPlansService = scope.ServiceProvider.GetService<CreditPlansService>();
     var creditsService = scope.ServiceProvider.GetService<CreditsService>();
+    var creditCardsService = scope.ServiceProvider.GetService<CreditCardsService>();
 
     _creditPlans = await creditPlansService.GetCreditPlansAsync();
     _credits = await creditsService.GetCreditsAsync();
+    _creditCards = await creditCardsService.GetCreditCardsAsync();
   }
 
   private async Task CloseCredit(CreditDto credit)
@@ -167,5 +179,10 @@
     {
       credit.Closed = true;
     }
+  }
+
+  private async Task ShowPopover(CreditDto credit)
+  {
+    await JSRuntime.InvokeVoidAsync("ShowPopover", $"#{credit.ID}");
   }
 }

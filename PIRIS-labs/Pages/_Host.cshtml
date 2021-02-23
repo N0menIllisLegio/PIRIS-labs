@@ -40,6 +40,10 @@
     window.ShowToast = (toastSelector) => {
       $(toastSelector).toast('show');
     }
+
+    window.ShowPopover = (popoverSelector) => {
+      $(popoverSelector).popover('toggle')
+    };
   </script>
 </body>
 </html>
