@@ -71,8 +71,8 @@ namespace PIRIS_labs.Services
           var developmentFundAccount = await _unitOfWork.Accounts.GetBankDevelopmentFundAccount();
 
           await _transactionsService.CreateTransaction(developmentFundAccount, mainAccount, amount);
-          await _transactionsService.CreateTransaction(mainAccount, cashboxAccount, amount);
-          cashboxAccount.CreditValue += amount;
+          //await _transactionsService.CreateTransaction(mainAccount, cashboxAccount, amount);
+          //cashboxAccount.CreditValue += amount;
 
           _unitOfWork.Credits.Add(credit);
           await _unitOfWork.SaveAsync();
@@ -114,7 +114,7 @@ namespace PIRIS_labs.Services
             await _transactionsService.CreateTransaction(cashboxAccount, clientPercentAccount, percentDebth);
           }
 
-          decimal creditDebthAmount = CalculateCreditDebthAmount(credit);
+          decimal creditDebthAmount = clientMainAccount.Balance - CalculateCreditDebthAmount(credit);
           if (creditDebthAmount > 0)
           {
             cashboxAccount.DebitValue += creditDebthAmount;
