@@ -19,6 +19,7 @@ namespace PIRIS_labs.Data
     private AccountsRepository _accountsRepository;
     private AccountPlansRepository _accountPlansRepository;
     private TransactionsRepository _transactionsRepository;
+    private CreditCardsRepository _creditCardsRepository;
 
     private DepositsRepository _depositsRepository;
     private DepositPlansRepository _depositPlansRepository;
@@ -43,6 +44,7 @@ namespace PIRIS_labs.Data
     public DepositPlansRepository DepositPlans => _depositPlansRepository = _depositPlansRepository ?? new DepositPlansRepository(_applicationDbContext);
     public CreditsRepository Credits => _creditsRepository = _creditsRepository ?? new CreditsRepository(_applicationDbContext);
     public CreditPlansRepository CreditPlans => _creditPlansRepository = _creditPlansRepository ?? new CreditPlansRepository(_applicationDbContext);
+    public CreditCardsRepository CreditCards => _creditCardsRepository = _creditCardsRepository ?? new CreditCardsRepository(_applicationDbContext);
 
     public async Task<bool> SaveAsync()
     {

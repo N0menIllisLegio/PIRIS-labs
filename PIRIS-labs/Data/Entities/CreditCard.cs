@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PIRIS_labs.Data.Entities
 {
-  public class CreditCard
+  public class CreditCard : IEntity
   {
     [Key]
     [StringLength(16, MinimumLength = 16)]
