@@ -18,6 +18,7 @@ namespace PIRIS_labs.Data
     public DbSet<Account> Accounts { get; set; }
     public DbSet<AccountPlan> AccountPlans { get; set; }
     public DbSet<Transaction> Transactions { get; set; }
+    public DbSet<CreditCard> CreditCards { get; set; }
 
     public DbSet<Deposit> Deposits { get; set; }
     public DbSet<DepositPlan> DepositPlans { get; set; }
