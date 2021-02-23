@@ -29,6 +29,14 @@ namespace PIRIS_labs.Services
       return creditCards.Select(_mapper.Map<CreditCardDto>).ToList();
     }
 
+    public async Task<CreditCardDto> GetCreditCardAsync(Guid creditID)
+    {
+      var credit = await _unitOfWork.Credits.GetFirstWhereAsync(credit => credit.ID == creditID);
+      var creditCard = await _unitOfWork.CreditCards.GetFirstWhereAsync(card => card.CreditAccountNumber == credit.MainAccountNumber);
+
+      return _mapper.Map<CreditCardDto>(creditCard);
+    }
+
     public async Task<string> GenerateCreditCardNumber()
     {
       string creditCardNumber;
