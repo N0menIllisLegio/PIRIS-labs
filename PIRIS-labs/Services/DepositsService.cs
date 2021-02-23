@@ -17,14 +17,16 @@ namespace PIRIS_labs.Services
     private readonly IMapper _mapper;
     private readonly AccountsService _accountsService;
     private readonly TransactionsService _transactionsService;
+    private readonly DateService _dateService;
 
     public DepositsService(UnitOfWork unitOfWork, IMapper mapper,
-      AccountsService accountsService, TransactionsService transactionsService)
+      AccountsService accountsService, TransactionsService transactionsService, DateService dateService)
     {
       _unitOfWork = unitOfWork;
       _mapper = mapper;
       _accountsService = accountsService;
       _transactionsService = transactionsService;
+      _dateService = dateService;
     }
 
     public async Task<List<DepositDto>> GetDepositsAsync()
@@ -50,8 +52,8 @@ namespace PIRIS_labs.Services
         {
           var deposit = _mapper.Map<Deposit>(createDepositDto);
           var depositPlan = await _unitOfWork.DepositPlans.FindAsync(createDepositDto.DepositPlanID);
-          deposit.StartDate = DateTime.Today;
-          deposit.EndDate = DateTime.Today.AddDays(depositPlan.DayPeriod);
+          deposit.StartDate = _dateService.Today;
+          deposit.EndDate = _dateService.Today.AddDays(depositPlan.DayPeriod);
 
           var (mainAccount, percentAccount) = await _accountsService.OpenDepositAccountsAsync(deposit.ClientID);
 
@@ -138,7 +140,7 @@ namespace PIRIS_labs.Services
 
       foreach (var depositPercentAccount in depositPercentAccounts)
       {
-        decimal amount = depositPercentAccount.DepositAmount * (depositPercentAccount.Percent / 100 / (DateTime.IsLeapYear(DateTime.Now.Year) ? 366 : 365));
+        decimal amount = depositPercentAccount.DepositAmount * (depositPercentAccount.Percent / 100 / (DateTime.IsLeapYear(_dateService.Today.Year) ? 366 : 365));
         await _transactionsService.CreateTransaction(developmentFundAccount, depositPercentAccount.Account, amount);
       }
     }

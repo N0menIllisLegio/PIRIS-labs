@@ -8,6 +8,7 @@ using PIRIS_labs.Data;
 using PIRIS_labs.Data.Entities;
 using PIRIS_labs.DTOs;
 using PIRIS_labs.DTOs.Credit;
+using PIRIS_labs.Helpers;
 
 namespace PIRIS_labs.Services
 {
@@ -20,16 +21,18 @@ namespace PIRIS_labs.Services
     private readonly AccountsService _accountsService;
     private readonly TransactionsService _transactionsService;
     private readonly CreditCardsService _creditCardsService;
+    private readonly DateService _dateService;
 
     public CreditsService(UnitOfWork unitOfWork, IMapper mapper,
       AccountsService accountsService, TransactionsService transactionsService,
-      CreditCardsService creditCardsService)
+      CreditCardsService creditCardsService, DateService dateService)
     {
       _unitOfWork = unitOfWork;
       _mapper = mapper;
       _accountsService = accountsService;
       _transactionsService = transactionsService;
       _creditCardsService = creditCardsService;
+      _dateService = dateService;
     }
 
     public static int GetMonthDifference(DateTime startDate, DateTime endDate)
@@ -61,8 +64,8 @@ namespace PIRIS_labs.Services
         {
           var credit = _mapper.Map<Credit>(createCreditDto);
           var creditPlan = await _unitOfWork.CreditPlans.FindAsync(createCreditDto.CreditPlanID);
-          credit.StartDate = DateTime.Today;
-          credit.EndDate = DateTime.Today.AddMonths(creditPlan.MonthPeriod);
+          credit.StartDate = _dateService.Today;
+          credit.EndDate = _dateService.Today.AddMonths(creditPlan.MonthPeriod);
 
           var (mainAccount, percentAccount) = await _accountsService.OpenCreditAccountsAsync(credit.ClientID);
 
@@ -76,9 +79,6 @@ namespace PIRIS_labs.Services
           var developmentFundAccount = await _unitOfWork.Accounts.GetBankDevelopmentFundAccount();
 
           await _transactionsService.CreateTransaction(developmentFundAccount, mainAccount, amount);
-          //await _transactionsService.CreateTransaction(mainAccount, cashboxAccount, amount);
-          //cashboxAccount.CreditValue += amount;
-
           _unitOfWork.Credits.Add(credit);
 
           var creditCard = new CreditCard
@@ -160,12 +160,13 @@ namespace PIRIS_labs.Services
       var creditPlan = credit.CreditPlan;
       var creditPaymentPlan = CalculateCreditPaymentPlan(credit.Amount, creditPlan.Percent, creditPlan.MonthPeriod, creditPlan.Anuity, credit.StartDate);
 
-      return creditPaymentPlan.Aggregate(0m, (debth, nextPayment) => nextPayment.Date >= DateTime.Today ? debth += nextPayment.PaymentSum : debth);
+      return creditPaymentPlan.Aggregate(0m, (debth, nextPayment) => nextPayment.Date >= _dateService.Today ? debth += nextPayment.PaymentSum : debth);
     }
 
     public List<CreditPercentsDto> CalculateCreditPaymentPlan(decimal creditAmount, decimal yearPercent, int months, bool anuity,
       DateTime startDate)
     {
+      yearPercent /= 100;
       var result = new List<CreditPercentsDto>();
       decimal mainDebth;
 
@@ -208,6 +209,8 @@ namespace PIRIS_labs.Services
       {
         decimal paymentAmount;
 
+        creditPercentAccount.CreditPercent /= 100;
+
         if (creditPercentAccount.Anuity)
         {
           double monthPercent = (double)creditPercentAccount.CreditPercent / 12;
@@ -216,14 +219,14 @@ namespace PIRIS_labs.Services
         }
         else
         {
-          int monthsPassed = GetMonthDifference(DateTime.Today, creditPercentAccount.StartDate);
+          int monthsPassed = _dateService.Today.GetMonthDifference(creditPercentAccount.StartDate);
 
           decimal mainDebth = creditPercentAccount.CreditAmount / creditPercentAccount.Months;
           decimal percentDebth = (creditPercentAccount.CreditAmount - (mainDebth * monthsPassed)) * creditPercentAccount.CreditPercent / 12;
           paymentAmount = mainDebth + percentDebth;
 
           // Here we calculate payment amount in 1 day, not a month
-          paymentAmount /= DateTime.DaysInMonth(DateTime.Today.Year, DateTime.Today.Month);
+          paymentAmount /= DateTime.DaysInMonth(_dateService.Today.Year, _dateService.Today.Month);
         }
 
         await _transactionsService.CreateTransaction(creditPercentAccount.PercentAccount, developmentFundAccount, paymentAmount);

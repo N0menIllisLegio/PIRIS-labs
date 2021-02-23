@@ -46,7 +46,7 @@
         {
           <span class="spinner-border spinner-border-sm p-2 mr-2" role="status" aria-hidden="true" />
         }
-        Close Bank Day
+        Close Bank Day @CurrentDate
       </button>
 
       if (!Result.Success)
@@ -113,7 +113,7 @@
     else
     {
       <blockquote class="blockquote m-5">
-      	<p class="mb-0">There are no deposit accounts in your bank...</p>
+        <p class="mb-0">There are no deposit accounts in your bank...</p>
       </blockquote>
     }
   </div>
@@ -182,17 +182,19 @@
   private IReadOnlyList<AccountDto> _creditAccounts = null;
   private bool Spinner = false;
   private DTOs.ResultDto Result = new DTOs.ResultDto { Success = true };
+  private string CurrentDate = String.Empty;
 
   protected override async Task OnInitializedAsync()
   {
-    await RefreshTable();
+    await RefreshData();
     await base.OnInitializedAsync();
   }
 
-  private async Task RefreshTable()
+  private async Task RefreshData()
   {
     using var scope = serviceScopeFactory.CreateScope();
     var accountsService = scope.ServiceProvider.GetService<AccountsService>();
+    CurrentDate = scope.ServiceProvider.GetService<DateService>().Today.ToShortDateString();
 
     _bankAccounts = await accountsService.GetBankAccountsAsync();
     _depositAccounts = await accountsService.GetDepositAccountsAsync();
@@ -209,7 +211,7 @@
     if (Result.Success)
     {
       await JSRuntime.InvokeVoidAsync("ShowToast", ".toast");
-      await RefreshTable();
+      await RefreshData();
     }
   }
 }

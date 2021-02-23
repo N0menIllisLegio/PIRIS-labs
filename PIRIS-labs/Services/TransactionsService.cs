@@ -11,11 +11,13 @@ namespace PIRIS_labs.Services
   {
     private readonly UnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
+    private readonly DateService _dateService;
 
-    public TransactionsService(UnitOfWork unitOfWork, IMapper mapper)
+    public TransactionsService(UnitOfWork unitOfWork, IMapper mapper, DateService dateService)
     {
       _unitOfWork = unitOfWork;
       _mapper = mapper;
+      _dateService = dateService;
     }
 
     public async Task<Transaction> CreateTransaction(Account fromAccount, Account toAccount, decimal amount)
@@ -28,7 +30,7 @@ namespace PIRIS_labs.Services
       var transaction = new Transaction
       {
         Amount = amount,
-        TransactionTime = DateTime.Now,
+        TransactionTime = _dateService.Today,
         TransferFromAccount = fromAccount,
         TransferToAccount = toAccount
       };

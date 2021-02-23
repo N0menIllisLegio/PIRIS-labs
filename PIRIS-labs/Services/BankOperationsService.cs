@@ -12,15 +12,18 @@ namespace PIRIS_labs.Services
     private readonly DepositsService _depositsService;
     private readonly AccountsService _accountsService;
     private readonly CreditsService _creditsService;
+    private readonly DateService _dateService;
 
     public BankOperationsService(UnitOfWork unitOfWork, IMapper mapper,
-      DepositsService depositsService, AccountsService accountsService, CreditsService creditsService)
+      DepositsService depositsService, AccountsService accountsService, CreditsService creditsService,
+      DateService dateService)
     {
       _unitOfWork = unitOfWork;
       _mapper = mapper;
       _depositsService = depositsService;
       _accountsService = accountsService;
       _creditsService = creditsService;
+      _dateService = dateService;
     }
 
     public async Task<ResultDto> CloseDayAsync()
@@ -34,6 +37,8 @@ namespace PIRIS_labs.Services
         await _accountsService.CalculateAccountsBalances();
 
         await transaction.CommitAsync();
+
+        _dateService.DaysPassed(1);
       }
       catch (System.Exception ex)
       {

@@ -31,6 +31,8 @@ namespace PIRIS_labs
 
       services.AddAutoMapper(typeof(AutoMapperProfile));
 
+      services.AddSingleton<DateService>();
+
       services.AddScoped<UnitOfWork>();
       services.AddScoped<ClientsService>();
       services.AddScoped<CitiesService>();

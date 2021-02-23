@@ -376,8 +376,8 @@
     {
       Title = @"Add new Client";
 
-      client.Birthday = DateTime.Today;
-      client.PassportIssuedDate = DateTime.Today;
+      client.Birthday = DateTime.Today.AddYears(-18);
+      client.PassportIssuedDate = DateTime.Today.AddDays(-1);
     }
     else
     {
