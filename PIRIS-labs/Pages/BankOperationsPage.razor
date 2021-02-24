@@ -226,6 +226,7 @@
 
   private async Task CloseBankDay()
   {
+    Spinner = true;
     using var scope = serviceScopeFactory.CreateScope();
     var bankOperationsService = scope.ServiceProvider.GetService<BankOperationsService>();
 
@@ -236,5 +237,7 @@
       await JSRuntime.InvokeVoidAsync("ShowToast", ".toast");
       await RefreshData();
     }
+
+    Spinner = false;
   }
 }

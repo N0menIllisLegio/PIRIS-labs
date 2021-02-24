@@ -131,12 +131,11 @@ namespace PIRIS_labs.Services
             await _transactionsService.CreateTransaction(cashboxAccount, clientPercentAccount, percentDebth);
           }
 
-          decimal creditDebthAmount = clientMainAccount.Balance - CalculateCreditDebthAmount(credit);
-          if (creditDebthAmount > 0)
+          if (clientMainAccount.Balance > 0)
           {
-            cashboxAccount.DebitValue += creditDebthAmount;
-            await _transactionsService.CreateTransaction(cashboxAccount, clientMainAccount, creditDebthAmount);
-            await _transactionsService.CreateTransaction(clientMainAccount, developmentFundAccount, creditDebthAmount);
+            decimal creditAmountLeft = clientMainAccount.Balance;
+            await _transactionsService.CreateTransaction(clientMainAccount, cashboxAccount, creditAmountLeft);
+            cashboxAccount.CreditValue += creditAmountLeft;
           }
 
           credit.Closed = true;
@@ -208,7 +207,6 @@ namespace PIRIS_labs.Services
       foreach (var creditPercentAccount in creditPercentAccounts.Where(dto => dto.Credit.EndDate >= _dateService.Today))
       {
         decimal paymentAmount;
-
         creditPercentAccount.CreditPercent /= 100;
 
         if (creditPercentAccount.Anuity)
@@ -224,10 +222,10 @@ namespace PIRIS_labs.Services
           decimal mainDebth = creditPercentAccount.Credit.Amount / creditPercentAccount.Months;
           decimal percentDebth = (creditPercentAccount.Credit.Amount - (mainDebth * monthsPassed)) * creditPercentAccount.CreditPercent / 12;
           paymentAmount = mainDebth + percentDebth;
-
-          // Here we calculate payment amount in 1 day, not a month
-          paymentAmount /= DateTime.DaysInMonth(_dateService.Today.Year, _dateService.Today.Month);
         }
+
+        // Here we calculate payment amount in 1 day, not a month
+        paymentAmount /= DateTime.DaysInMonth(_dateService.Today.Year, _dateService.Today.Month);
 
         await _transactionsService.CreateTransaction(creditPercentAccount.PercentAccount, developmentFundAccount, paymentAmount);
       }

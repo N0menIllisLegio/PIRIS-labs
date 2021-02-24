@@ -30,11 +30,14 @@ namespace PIRIS_labs.Services
     {
       try
       {
-        await _depositsService.CalculateDepositsPercents(closeDays);
-        await _creditsService.CalculateCreditsPercents();
-        await _accountsService.CalculateAccountsBalances();
+        for (int i = 0; i < closeDays; i++)
+        {
+          await _depositsService.CalculateDepositsPercents();
+          await _creditsService.CalculateCreditsPercents();
+          await _accountsService.CalculateAccountsBalances();
 
-        _dateService.DaysPassed(closeDays);
+          _dateService.DaysPassed(1);
+        }
       }
       catch (System.Exception ex)
       {
