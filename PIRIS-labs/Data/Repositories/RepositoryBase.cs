@@ -108,6 +108,11 @@ namespace PIRIS_labs.Data.Repositories
       return DbSet.Remove(entity).Entity;
     }
 
+    public virtual void RemoveRange(IEnumerable<TEntity> entities)
+    {
+      DbSet.RemoveRange(entities);
+    }
+
     public async Task<TEntity> ReloadAsync(TEntity entity)
     {
       await ApplicationDbContext.Entry(entity).ReloadAsync();

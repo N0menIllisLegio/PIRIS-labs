@@ -15,7 +15,10 @@ namespace PIRIS_labs.Services
     private readonly UnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
 
-    public ClientsService(UnitOfWork unitOfWork, IMapper mapper)
+    public ClientsService(UnitOfWork unitOfWork, IMapper mapper,
+      CreditsService creditsService,
+      DepositsService depositsService,
+      AccountsService accountsService)
     {
       _unitOfWork = unitOfWork;
       _mapper = mapper;
@@ -65,12 +68,45 @@ namespace PIRIS_labs.Services
 
     public async Task<ResultDto> DeleteClient(Guid clientID)
     {
-      var dbclient = await _unitOfWork.Clients.FindAsync(clientID);
-      _unitOfWork.Clients.Remove(dbclient);
+      var client = await _unitOfWork.Clients.FindAsync(clientID);
+
+      if (client is null)
+      {
+        return new ResultDto
+        {
+          Success = false,
+          Message = "User not found."
+        };
+      }
+
+      var clientCredits = await _unitOfWork.Credits.GetAllByWhereAsync(credit => credit.ClientID == clientID);
+      var clientDeposits = await _unitOfWork.Deposits.GetAllByWhereAsync(deposit => deposit.ClientID == clientID);
+
+      if (clientCredits.Any(credit => !credit.Closed) || clientDeposits.Any(deposit => !deposit.Closed))
+      {
+        return new ResultDto
+        {
+          Success = false,
+          Message = "Cannot delete user with not closed deposits or credits."
+        };
+      }
+
+      var clientAccounts = await _unitOfWork.Accounts.GetAllByWhereAsync(account => account.OwnerID == clientID);
+      var accountsNumbers = clientAccounts.Select(account => account.Number).ToList();
+
+      var accountsTransactions = await _unitOfWork.Transactions.GetAllByWhereAsync(transaction =>
+        accountsNumbers.Contains(transaction.TransferFromAccountNumber) || accountsNumbers.Contains(transaction.TransferToAccountNumber));
+
+      _unitOfWork.Transactions.RemoveRange(accountsTransactions);
+      _unitOfWork.Credits.RemoveRange(clientCredits);
+      _unitOfWork.Deposits.RemoveRange(clientDeposits);
+      _unitOfWork.Accounts.RemoveRange(clientAccounts);
+      _unitOfWork.Clients.Remove(client);
+
       var result = new ResultDto
       {
         Success = await _unitOfWork.SaveAsync(),
-        Message = "Remove all client's accounts, deposits etc. to delete him"
+        Message = "Remove all client's accounts, deposits etc. to delete him."
       };
 
       return result;
