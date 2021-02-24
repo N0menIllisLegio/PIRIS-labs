@@ -110,7 +110,10 @@
         <tr>
           <th scope="col">#</th>
           <th scope="col">Payment Date</th>
-          <th scope="col">%</th>
+          @if (ShowNonAnuityColumn)
+          {
+            <th scope="col">%</th>
+          }
           <th scope="col">Main Debth</th>
           <th scope="col">Payment Sum</th>
         </tr>
@@ -122,7 +125,10 @@
         <tr>
           <th scope="row">@creditPercent.RowNumber</th>
           <td>@creditPercent.Date.ToShortDateString()</td>
-          <td>@creditPercent.PercentDebth</td>
+          @if (ShowNonAnuityColumn)
+          {
+            <td>@creditPercent.PercentDebth</td>
+          }
           <td>@creditPercent.MainDebth</td>
           <td>@creditPercent.PaymentSum</td>
         </tr>
@@ -150,6 +156,8 @@
   private bool Spinner = false;
   private bool CalculatingPercents = false;
   private PIRIS_labs.DTOs.ResultDto Result = new DTOs.ResultDto { Success = true };
+
+  private bool ShowNonAnuityColumn = false;
 
   private string ClientInfo
   {
@@ -237,6 +245,7 @@
     {
       if (_createCreditDto.Amount >= creditPlan.MinAmount.GetValueOrDefault())
       {
+        ShowNonAnuityColumn = !creditPlan.Anuity;
         CalculatingPercents = true;
         using var scope = serviceScopeFactory.CreateScope();
         var creditsSerivce = scope.ServiceProvider.GetService<CreditsService>();

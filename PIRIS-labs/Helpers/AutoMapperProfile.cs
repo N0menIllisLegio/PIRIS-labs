@@ -37,9 +37,7 @@ namespace PIRIS_labs.Helpers
         .ForMember(dest => dest.Client, opt => opt.MapFrom(src => $"{src.Client.Surname} {src.Client.Name} {src.Client.Patronymic}"))
         .ForMember(dest => dest.MonthlyPayment, opt => opt.MapFrom(src => src.PercentAccount.Balance));
 
-      CreateMap<CreditCard, CreditCardDto>()
-        .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.EndDate.ToString("MM/yy")))
-        .ForMember(dest => dest.OwnerFullName, opt => opt.MapFrom(src => $"{src.Owner.Name.ToUpper()} {src.Owner.Surname.ToUpper()}"));
+      CreateMap<CreditCard, CreditCardDto>();
     }
   }
 }

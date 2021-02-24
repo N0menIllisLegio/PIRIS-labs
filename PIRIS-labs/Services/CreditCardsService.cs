@@ -37,6 +37,25 @@ namespace PIRIS_labs.Services
       return _mapper.Map<CreditCardDto>(creditCard);
     }
 
+    public async Task<BalanceInquiryDto> InquiryBalace(CreditCardDto creditCardDto)
+    {
+      var creditCard = await _unitOfWork.CreditCards.GetFirstWhereAsync(card => card.Number == creditCardDto.Number);
+      var creditAccount = creditCard.CreditAccount;
+
+      return new BalanceInquiryDto
+      {
+        Balance = creditAccount.Balance,
+        Number = $"{creditCard.Number.Substring(0, 4)}*********{creditCard.Number.Substring(12)}",
+        ClientFullName = $"{creditCard.Owner.Surname.ToUpper()} {creditCard.Owner.Name.ToUpper()}"
+      };
+    }
+
+    public async Task<bool> Authenticate(CreditCardDto creditCardDto)
+    {
+      var creditCard = await _unitOfWork.CreditCards.GetFirstWhereAsync(card => card.Number == creditCardDto.Number);
+      return creditCard is not null && creditCard.PIN == creditCardDto.PIN;
+    }
+
     public async Task<string> GenerateCreditCardNumber()
     {
       string creditCardNumber;

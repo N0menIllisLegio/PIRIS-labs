@@ -12,9 +12,6 @@ namespace PIRIS_labs.DTOs.ATM
     [Required]
     [RegularExpression(@"^[0-9]{4}$")]
     public string PIN { get; set; }
-    public string EndDate { get; set; }
-
-    public string OwnerFullName { get; set; }
 
     public Guid OwnerID { get; set; }
     public string CreditAccountNumber { get; set; }

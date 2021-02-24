@@ -1,0 +1,181 @@
+﻿@page "/atm/insert-credit-card"
+
+@using Services
+@using DTOs.ATM
+@using Microsoft.Extensions.DependencyInjection
+@using Microsoft.JSInterop
+
+@inject IJSRuntime JSRuntime
+
+@inject IServiceScopeFactory serviceScopeFactory
+
+@inject NavigationManager NavigationManager
+
+<div class="container-fluid">
+  <div class="row d-flex justify-content-center">
+    <div class="col-3" style="margin-top: 250px">
+      <EditForm Model="@_creditCardDto" OnValidSubmit="@OnCardSubmited">
+        <DataAnnotationsValidator />
+        <div class="card shadow mb-4">
+          <div class="card-header text-center">
+            Credit card
+          </div>
+          <div class="card-body">
+            <div class="input-group mb-3">
+              <div class="input-group-prepend">
+                <span class="input-group-text">Number</span>
+              </div>
+              <InputText class="form-control" @bind-Value="@_creditCardDto.Number" maxlength="16" />
+            </div>
+            <div class="input-group">
+              <div class="input-group-prepend">
+                <span class="input-group-text">PIN</span>
+              </div>
+              <InputText class="form-control" @bind-Value="@_creditCardDto.PIN" type="password" maxlength="4" />
+            </div>
+          </div>
+          <div class="card-footer text-center p-1">
+            <button type="submit" class="btn btn-link">Submit card</button>
+          </div>
+        </div>
+        <ValidationSummary />
+      </EditForm>
+    </div>
+  </div>
+
+  <div class="toast alert alert-danger m-5" style="position: fixed; bottom: 0; right: 0;" data-delay="3500">
+    <div class="toast-header">
+      <strong class="mr-auto">Error!</strong>
+      <small>@(DateTime.Now.ToShortTimeString())</small>
+    </div>
+    <div class="toast-body">
+      Card number or password isn't valid!
+    </div>
+  </div>
+
+
+  <div class="modal fade" id="atmMainMenu" tabindex="-1" data-backdrop="false">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header d-flex justify-content-center"><h3 class="modal-title">ATM</h3></div>
+        <div class="modal-body d-flex justify-content-center row">
+          <h1 class="m-5">Welcome!</h1>
+
+          <div class="btn-group btn-group-lg mt-5">
+            <button type="button" class="btn btn-primary" @onclick="@(() => ToggleModal("#atmMainMenu"))" @onclick:preventDefault>Cash Withdrawal</button>
+            <button type="button" class="btn btn-primary" @onclick="@BalanceInquiry" @onclick:preventDefault>Balance Inquiry</button>
+            <button type="button" class="btn btn-danger" @onclick="@(() => ToggleModal("#atmMainMenu"))" @onclick:preventDefault>Quit</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="atmContinueWork" tabindex="-1" data-backdrop="false">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header d-flex justify-content-center"><h3 class="modal-title">ATM</h3></div>
+        <div class="modal-body d-flex justify-content-center row">
+          <h1 class="m-5">Continue work on ATM?</h1>
+
+          <div class="btn-group btn-group-lg mt-5">
+            <button type="button" class="btn btn-primary" @onclick="@(() => OpenNextModal("#atmContinueWork", "#atmMainMenu"))" @onclick:preventDefault>Continue</button>
+            <button type="button" class="btn btn-danger" @onclick="@(() => ToggleModal("#atmContinueWork"))" @onclick:preventDefault>Quit</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="atmBlanceInquiryResult" tabindex="-1" data-backdrop="false">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header d-flex justify-content-center"><h3 class="modal-title">ATM</h3></div>
+        <div class="modal-body">
+          <h1 class="m-5 row d-flex justify-content-center">Blance: @BlanceInquiryResult.Balance</h1>
+
+          <h4 class="row d-flex justify-content-center">Print receipt?</h4>
+
+          <div class="btn-group btn-group-lg mt-5 m-3 row d-flex justify-content-center">
+            <button type="button" class="btn btn-primary" @onclick="@(() => OpenNextModal("#atmBlanceInquiryResult", "#atmPrintReceipt"))" @onclick:preventDefault>Yes</button>
+            <button type="button" class="btn btn-danger" @onclick="@(() => OpenNextModal("#atmBlanceInquiryResult", "#atmContinueWork"))" @onclick:preventDefault>No</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="atmPrintReceipt" tabindex="-1" data-backdrop="false">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header d-flex justify-content-center"><h3 class="modal-title">ATM</h3></div>
+        <div class="modal-body">
+          <h1 class="m-5 row d-flex justify-content-center">Receipt</h1>
+
+          <div class="ml-5 mr-5">
+            <div class="row">
+              <strong class="col-5">Card Number:</strong>
+              <div class="col">@BlanceInquiryResult.Number</div>
+            </div>
+            <div class="row">
+              <strong class="col-5">Card Holder:</strong>
+              <div class="col">@BlanceInquiryResult.ClientFullName</div>
+            </div>
+            <div class="row">
+              <strong class="col-5">Balance:</strong>
+              <div class="col">@BlanceInquiryResult.Balance</div>
+            </div>
+          </div>
+
+          <div class="btn-group btn-group-lg mt-5 m-3 row d-flex justify-content-center">
+            <button type="button" class="btn btn-danger" @onclick="@(() => OpenNextModal("#atmPrintReceipt", "#atmContinueWork"))" @onclick:preventDefault>OK</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+@code
+{
+  private CreditCardDto _creditCardDto = new CreditCardDto();
+  private bool CardInserted = false;
+
+  private async Task OnCardSubmited()
+  {
+    using var scope = serviceScopeFactory.CreateScope();
+    var creditCardsService = scope.ServiceProvider.GetService<CreditCardsService>();
+
+    bool result = await creditCardsService.Authenticate(_creditCardDto);
+
+    if (result)
+    {
+      await JSRuntime.InvokeVoidAsync("ShowModal", "#atmMainMenu");
+    }
+    else
+    {
+      await JSRuntime.InvokeVoidAsync("ShowToast", ".toast");
+    }
+  }
+
+  private BalanceInquiryDto BlanceInquiryResult = new BalanceInquiryDto();
+
+  private async Task BalanceInquiry()
+  {
+    using var scope = serviceScopeFactory.CreateScope();
+    var creditCardsService = scope.ServiceProvider.GetService<CreditCardsService>();
+    BlanceInquiryResult = await creditCardsService.InquiryBalace(_creditCardDto);
+    await OpenNextModal("#atmMainMenu", "#atmBlanceInquiryResult");
+  }
+
+  private async Task ToggleModal(string modalSelector)
+  {
+    await JSRuntime.InvokeVoidAsync("ShowModal", modalSelector);
+  }
+
+  private async Task OpenNextModal(string previousModalSelector, string nextModalSelector)
+  {
+    await ToggleModal(previousModalSelector);
+    await ToggleModal(nextModalSelector);
+  }
+}
