@@ -1,5 +1,6 @@
 ﻿@page "/bank-operations"
 
+@using Helpers
 @using Services
 @using DTOs.Common
 @using Microsoft.Extensions.DependencyInjection
@@ -7,11 +8,37 @@
 
 @inject IJSRuntime JSRuntime
 @inject IServiceScopeFactory serviceScopeFactory
+@inject DateService dateService
 
 @inject NavigationManager NavigationManager
 
 <div class="container-fluid">
-  <h1 class="m-5">Bank Operations</h1>
+  <div class="d-flex justify-content-between m-5">
+    <h1>Bank Operations</h1>
+
+    <div class="btn-group">
+      <button class="btn btn-primary btn-lg p-3" @onclick="@(() => CloseBankDay())" @onclick:preventDefault>
+        @if (Spinner)
+        {
+          <span class="spinner-border spinner-border-sm p-2 mr-2" role="status" aria-hidden="true" />
+        }
+        Close Bank
+      </button>
+
+      <div class="btn-group">
+        <button class="btn btn-primary btn-lg p-3 dropdown-toggle" data-toggle="dropdown">
+          @BankClosingTerm
+        </button>
+        <div class="dropdown-menu">
+          <a class="dropdown-item" @onclick="@(() => { GetClosingDaysCount = () => 1; BankClosingTerm = "Day"; })" @onclick:preventDefault>Day</a>
+          <a class="dropdown-item" @onclick="@(() => { GetClosingDaysCount = () => dateService.Today.DaysInMonth() - dateService.Today.Day + 1; BankClosingTerm = "Month"; })" @onclick:preventDefault>Month</a>
+          <a class="dropdown-item" @onclick="@(() => { GetClosingDaysCount = () => (new DateTime(dateService.Today.Year + 1, 1, 1) - dateService.Today).Days; BankClosingTerm = "Year"; })" @onclick:preventDefault>Year</a>
+        </div>
+      </div>
+
+      <button class="btn btn-outline-primary btn-lg p-3" disabled>@CurrentDate</button>
+    </div>
+  </div>
 
   <div>
     @if (_bankAccounts is not null && _bankAccounts.Count > 0)
@@ -40,14 +67,6 @@
           }
         </tbody>
       </table>
-
-      <button class="btn btn-primary btn-lg p-3" @onclick="@(() => CloseBankDay())" @onclick:preventDefault>
-        @if (Spinner)
-        {
-          <span class="spinner-border spinner-border-sm p-2 mr-2" role="status" aria-hidden="true" />
-        }
-        Close Bank Day @CurrentDate
-      </button>
 
       if (!Result.Success)
       {
@@ -170,7 +189,7 @@
       <small>@(DateTime.Now.ToShortTimeString())</small>
     </div>
     <div class="toast-body">
-      Bank day closed successfully.
+      Bank @BankClosingTerm closed successfully.
     </div>
   </div>
 </div>
@@ -183,6 +202,10 @@
   private bool Spinner = false;
   private DTOs.ResultDto Result = new DTOs.ResultDto { Success = true };
   private string CurrentDate = String.Empty;
+  private Func<int> GetClosingDaysCount = () => 1;
+  private string BankClosingTerm = "Day";
+
+  private DateTime temp = DateTime.Today;
 
   protected override async Task OnInitializedAsync()
   {
@@ -194,7 +217,7 @@
   {
     using var scope = serviceScopeFactory.CreateScope();
     var accountsService = scope.ServiceProvider.GetService<AccountsService>();
-    CurrentDate = scope.ServiceProvider.GetService<DateService>().Today.ToShortDateString();
+    CurrentDate = dateService.Today.ToShortDateString();
 
     _bankAccounts = await accountsService.GetBankAccountsAsync();
     _depositAccounts = await accountsService.GetDepositAccountsAsync();
@@ -206,7 +229,7 @@
     using var scope = serviceScopeFactory.CreateScope();
     var bankOperationsService = scope.ServiceProvider.GetService<BankOperationsService>();
 
-    Result = await bankOperationsService.CloseDayAsync();
+    Result = await bankOperationsService.CloseDaysAsync(GetClosingDaysCount());
 
     if (Result.Success)
     {

@@ -44,11 +44,10 @@ namespace PIRIS_labs.Data.Repositories
         (firstJoinResult, creditPlan) => new CreditPercentAccountDto
         {
           PercentAccount = firstJoinResult.account,
-          CreditAmount = firstJoinResult.credit.Amount,
+          Credit = firstJoinResult.credit,
           CreditPercent = creditPlan.Percent,
           Anuity = creditPlan.Anuity,
           Months = creditPlan.MonthPeriod,
-          StartDate = firstJoinResult.credit.StartDate
         });
 
       return await query.ToListAsync();

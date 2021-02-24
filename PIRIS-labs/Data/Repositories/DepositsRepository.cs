@@ -44,7 +44,7 @@ namespace PIRIS_labs.Data.Repositories
         (firstJoinResult, depositPlan) => new DepositPercentAccountDto
         {
           Account = firstJoinResult.account,
-          DepositAmount = firstJoinResult.deposit.Amount,
+          Deposit = firstJoinResult.deposit,
           Percent = depositPlan.Percent
         });
 

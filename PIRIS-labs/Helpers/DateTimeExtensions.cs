@@ -9,5 +9,10 @@ namespace PIRIS_labs.Helpers
       int monthsApart = 12 * (startDate.Year - endDate.Year) + startDate.Month - endDate.Month;
       return Math.Abs(monthsApart);
     }
+
+    public static int DaysInMonth(this DateTime date)
+    {
+      return DateTime.DaysInMonth(date.Year, date.Month);
+    }
   }
 }

@@ -26,23 +26,18 @@ namespace PIRIS_labs.Services
       _dateService = dateService;
     }
 
-    public async Task<ResultDto> CloseDayAsync()
+    public async Task<ResultDto> CloseDaysAsync(int closeDays = 1)
     {
-      using var transaction = _unitOfWork.BeginTransaction();
-
       try
       {
-        await _depositsService.CalculateDepositsPercents();
+        await _depositsService.CalculateDepositsPercents(closeDays);
         await _creditsService.CalculateCreditsPercents();
         await _accountsService.CalculateAccountsBalances();
 
-        await transaction.CommitAsync();
-
-        _dateService.DaysPassed(1);
+        _dateService.DaysPassed(closeDays);
       }
       catch (System.Exception ex)
       {
-        await transaction.RollbackAsync();
         return new ResultDto { Success = false, Message = ex.Message };
       }
 

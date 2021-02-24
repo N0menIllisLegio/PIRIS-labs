@@ -205,7 +205,7 @@ namespace PIRIS_labs.Services
       var creditPercentAccounts = await _unitOfWork.Credits.GetOpenCreditPercentAccounts();
       var developmentFundAccount = await _unitOfWork.Accounts.GetBankDevelopmentFundAccount();
 
-      foreach (var creditPercentAccount in creditPercentAccounts)
+      foreach (var creditPercentAccount in creditPercentAccounts.Where(dto => dto.Credit.EndDate >= _dateService.Today))
       {
         decimal paymentAmount;
 
@@ -215,14 +215,14 @@ namespace PIRIS_labs.Services
         {
           double monthPercent = (double)creditPercentAccount.CreditPercent / 12;
           double mainDebth = monthPercent * Math.Pow(1 + monthPercent, creditPercentAccount.Months) / (Math.Pow(1 + monthPercent, creditPercentAccount.Months) - 1);
-          paymentAmount = creditPercentAccount.CreditAmount * (decimal)mainDebth;
+          paymentAmount = creditPercentAccount.Credit.Amount * (decimal)mainDebth;
         }
         else
         {
-          int monthsPassed = _dateService.Today.GetMonthDifference(creditPercentAccount.StartDate);
+          int monthsPassed = _dateService.Today.GetMonthDifference(creditPercentAccount.Credit.StartDate);
 
-          decimal mainDebth = creditPercentAccount.CreditAmount / creditPercentAccount.Months;
-          decimal percentDebth = (creditPercentAccount.CreditAmount - (mainDebth * monthsPassed)) * creditPercentAccount.CreditPercent / 12;
+          decimal mainDebth = creditPercentAccount.Credit.Amount / creditPercentAccount.Months;
+          decimal percentDebth = (creditPercentAccount.Credit.Amount - (mainDebth * monthsPassed)) * creditPercentAccount.CreditPercent / 12;
           paymentAmount = mainDebth + percentDebth;
 
           // Here we calculate payment amount in 1 day, not a month

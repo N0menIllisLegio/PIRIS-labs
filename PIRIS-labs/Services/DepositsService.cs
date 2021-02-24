@@ -87,61 +87,74 @@ namespace PIRIS_labs.Services
 
     public async Task<ResultDto> CloseDepositAsync(Guid depositID)
     {
-      using (var transaction = _unitOfWork.BeginTransaction())
+      using var transaction = _unitOfWork.BeginTransaction();
+
+      try
       {
-        try
+        var deposit = await _unitOfWork.Deposits.FindAsync(depositID);
+
+        if (deposit is null)
         {
-          var deposit = await _unitOfWork.Deposits.FindAsync(depositID);
-
-          if (deposit is null)
-          {
-            return new ResultDto { Success = false, Message = "Deposit Not Found" };
-          }
-
-          var clientMainAccount = deposit.MainAccount;
-          var clientPercentAccount = deposit.PercentAccount;
-          var cashboxAccount = await _unitOfWork.Accounts.GetBankCashboxAccount();
-          var developmentFundAccount = await _unitOfWork.Accounts.GetBankDevelopmentFundAccount();
-          decimal depositAmount = deposit.Amount;
-          decimal depositPercentsAmount = clientPercentAccount.Balance;
-
-          await _transactionsService.CreateTransaction(developmentFundAccount, clientMainAccount, depositAmount);
-          await _transactionsService.CreateTransaction(clientMainAccount, cashboxAccount, depositAmount);
-
-          cashboxAccount.CreditValue += depositAmount;
-
-          if (depositPercentsAmount > 0)
-          {
-            await _transactionsService.CreateTransaction(clientPercentAccount, cashboxAccount, depositPercentsAmount);
-
-            cashboxAccount.CreditValue += depositPercentsAmount;
-          }
-
-          deposit.Closed = true;
-
-          await _unitOfWork.SaveAsync();
-
-          await transaction.CommitAsync();
-
-          return new ResultDto { Success = true };
+          return new ResultDto { Success = false, Message = "Deposit Not Found" };
         }
-        catch (Exception ex)
+
+        var clientMainAccount = deposit.MainAccount;
+        var clientPercentAccount = deposit.PercentAccount;
+        var cashboxAccount = await _unitOfWork.Accounts.GetBankCashboxAccount();
+        var developmentFundAccount = await _unitOfWork.Accounts.GetBankDevelopmentFundAccount();
+        decimal depositAmount = deposit.Amount;
+        decimal depositPercentsAmount = clientPercentAccount.Balance;
+
+        await _transactionsService.CreateTransaction(developmentFundAccount, clientMainAccount, depositAmount);
+        await _transactionsService.CreateTransaction(clientMainAccount, cashboxAccount, depositAmount);
+
+        cashboxAccount.CreditValue += depositAmount;
+
+        if (depositPercentsAmount > 0)
         {
-          await transaction.RollbackAsync();
-          return new ResultDto { Success = false, Message = ex.Message };
+          await _transactionsService.CreateTransaction(clientPercentAccount, cashboxAccount, depositPercentsAmount);
+
+          cashboxAccount.CreditValue += depositPercentsAmount;
         }
+
+        deposit.Closed = true;
+
+        await _unitOfWork.SaveAsync();
+
+        await transaction.CommitAsync();
+
+        return new ResultDto { Success = true };
+      }
+      catch (Exception ex)
+      {
+        await transaction.RollbackAsync();
+        return new ResultDto { Success = false, Message = ex.Message };
       }
     }
 
-    public async Task CalculateDepositsPercents()
+    public async Task CalculateDepositsPercents(int daysPassed = 1)
     {
+      var nextDate = _dateService.Today.AddDays(daysPassed);
+
       var depositPercentAccounts = await _unitOfWork.Deposits.GetOpenDepositPercentAccounts();
       var developmentFundAccount = await _unitOfWork.Accounts.GetBankDevelopmentFundAccount();
 
       foreach (var depositPercentAccount in depositPercentAccounts)
       {
-        decimal amount = depositPercentAccount.DepositAmount * (depositPercentAccount.Percent / 100 / (DateTime.IsLeapYear(_dateService.Today.Year) ? 366 : 365));
-        await _transactionsService.CreateTransaction(developmentFundAccount, depositPercentAccount.Account, amount);
+        int days = nextDate > depositPercentAccount.Deposit.EndDate
+          ? (depositPercentAccount.Deposit.EndDate - _dateService.Today).Days
+          : daysPassed;
+
+        if (depositPercentAccount.Deposit.EndDate <= _dateService.Today)
+        {
+          await CloseDepositAsync(depositPercentAccount.Deposit.ID);
+        }
+        else
+        {
+          decimal amount = depositPercentAccount.Deposit.Amount * (depositPercentAccount.Percent / 100 / (DateTime.IsLeapYear(_dateService.Today.Year) ? 366 : 365));
+          amount *= days;
+          await _transactionsService.CreateTransaction(developmentFundAccount, depositPercentAccount.Account, amount);
+        }
       }
     }
   }
