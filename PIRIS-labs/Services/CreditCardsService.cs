@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using PIRIS_labs.Data;
+using PIRIS_labs.DTOs;
 using PIRIS_labs.DTOs.ATM;
 
 namespace PIRIS_labs.Services
@@ -15,11 +16,13 @@ namespace PIRIS_labs.Services
 
     private readonly UnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
+    private readonly TransactionsService _transactionsService;
 
-    public CreditCardsService(UnitOfWork unitOfWork, IMapper mapper)
+    public CreditCardsService(UnitOfWork unitOfWork, IMapper mapper, TransactionsService transactionsService)
     {
       _unitOfWork = unitOfWork;
       _mapper = mapper;
+      _transactionsService = transactionsService;
     }
 
     public async Task<List<CreditCardDto>> GetCreditCardsAsync()
@@ -44,9 +47,48 @@ namespace PIRIS_labs.Services
 
       return new BalanceInquiryDto
       {
-        Balance = creditAccount.Balance,
+        Balance = creditAccount.Balance + creditAccount.DebitValue - creditAccount.CreditValue,
         Number = $"{creditCard.Number.Substring(0, 4)}*********{creditCard.Number.Substring(12)}",
         ClientFullName = $"{creditCard.Owner.Surname.ToUpper()} {creditCard.Owner.Name.ToUpper()}"
+      };
+    }
+
+    public async Task<ResultDto> WithdrawCash(CreditCardDto creditCardDto, decimal amount)
+    {
+      var creditCard = await _unitOfWork.CreditCards.GetFirstWhereAsync(card => card.Number == creditCardDto.Number);
+
+      if (creditCard.CreditAccount.Balance < amount)
+      {
+        return new ResultDto
+        {
+          Success = false,
+          Message = "Insufficient funds."
+        };
+      }
+
+      var cashboxAccount = await _unitOfWork.Accounts.GetBankCashboxAccount();
+
+      var transaction = await _transactionsService.CreateTransaction(creditCard.CreditAccount, cashboxAccount, amount);
+      cashboxAccount.CreditValue += amount;
+
+      await _unitOfWork.SaveAsync();
+
+      return new ResultDto { Success = true, Message = transaction.ID.ToString() };
+    }
+
+    public async Task<CashWithdrawlDto> GetCashWithdrawlDtoAsync(CreditCardDto creditCardDto, Guid transactionID)
+    {
+      var creditCard = await _unitOfWork.CreditCards.GetFirstWhereAsync(card => card.Number == creditCardDto.Number);
+
+      var transaction = await _unitOfWork.Transactions.FindAsync(transactionID);
+
+      return new CashWithdrawlDto
+      {
+        Number = $"{creditCard.Number.Substring(0, 4)}*********{creditCard.Number.Substring(12)}",
+        ClientFullName = $"{creditCard.Owner.Surname.ToUpper()} {creditCard.Owner.Name.ToUpper()}",
+        TransactionTime = transaction.TransactionTime,
+        CreditAccountNumber = creditCard.CreditAccountNumber,
+        Amount = transaction.Amount
       };
     }
 
