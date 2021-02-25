@@ -1,0 +1,251 @@
+﻿@page "/credits"
+
+@using Services
+@using DTOs.Credit
+@using DTOs.ATM
+@using Microsoft.Extensions.DependencyInjection
+@using Microsoft.JSInterop
+
+@inject IJSRuntime JSRuntime
+
+@inject IServiceScopeFactory serviceScopeFactory
+
+@inject NavigationManager NavigationManager
+
+<div class="container-fluid">
+  <div class="d-flex justify-content-between m-5">
+    <h1>Credit Plans</h1>
+    <NavLink class="btn-lg btn-success p-3" href="@linkCreditPlanEdit" Match="NavLinkMatch.All">
+      Add new credit plan
+    </NavLink>
+  </div>
+
+  <div>
+    @if (_creditPlans is not null && _creditPlans.Count > 0)
+    {
+      <table class="table table-bordered table-hover">
+        <thead class="thead-dark">
+          <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Period, months</th>
+            <th scope="col">Percent a year, %</th>
+            <th scope="col">Minimum amount</th>
+            <th scope="col">Anuity credit</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @foreach (var creditPlan in _creditPlans)
+          {
+            <tr>
+              <th scope="row">@creditPlan.Name</th>
+              <td>@creditPlan.MonthPeriod</td>
+              <td>@creditPlan.Percent</td>
+              <td>
+                @if (creditPlan.MinAmount is not null)
+                {<div>@creditPlan.MinAmount</div>}
+              else
+              {<div>—</div>}
+              </td>
+              <td>
+                @if (creditPlan.Anuity)
+                {<div>Yes</div>}
+                else
+                {<div>No</div>}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+    else if (_creditPlans is null)
+    {
+      <div class="d-flex justify-content-center m-5">
+        <div class="spinner-border" role="status">
+          <span class="sr-only">Loading...</span>
+        </div>
+      </div>
+    }
+    else
+    {
+      <blockquote class="blockquote m-5">
+        <p class="mb-0">There are no deposit plans here.</p>
+        <footer class="blockquote-footer"><cite>Add first</cite></footer>
+      </blockquote>
+    }
+  </div>
+
+  <div class="d-flex justify-content-between m-5">
+    <h1>Credits</h1>
+    <NavLink class="btn-lg btn-success p-3" href="@linkCreditEdit" Match="NavLinkMatch.All">
+      Add new credit
+    </NavLink>
+  </div>
+
+  <div>
+    @if (_credits is not null && _credits.Count > 0)
+    {
+      <table class="table table-bordered table-hover mb-5">
+        <thead class="thead-dark">
+          <tr>
+            <th scope="col">Credit Plan</th>
+            <th scope="col">Client</th>
+            <th scope="col">End Date</th>
+            <th scope="col">Amount</th>
+            <th scope="col">Debth</th>
+            <th scope="col">Credit Card Info</th>
+            <th scope="col">Close Credit</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @foreach (var credit in _credits)
+          {
+            <tr class="@(credit.Closed ? "alert alert-secondary" : String.Empty)">
+              <th scope="row">@credit.CreditPlan</th>
+              <td>@credit.Client</td>
+              <td>@credit.EndDate.ToShortDateString()</td>
+              <td>@credit.Amount</td>
+              @if (!credit.Closed)
+              {
+                <td>@credit.MonthlyPayment</td>
+                <td class="pointerCursor alert alert-warning" @onclick="@(() => ShowModal(credit))" @onclick:preventDefault>
+                  <span class="fa fa-credit-card" />
+                </td>
+                <td class="pointerCursor alert alert-danger" @onclick="@(() => CloseCredit(credit))" @onclick:preventDefault><span class="fa fa-window-close" /></td>
+              }
+              else
+              {
+                <td>—</td>
+                <td>—</td>
+                <td>—</td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+    else if (_credits is null)
+    {
+      <div class="d-flex justify-content-center m-5">
+        <div class="spinner-border" role="status">
+          <span class="sr-only">Loading...</span>
+        </div>
+      </div>
+    }
+    else
+    {
+      <blockquote class="blockquote m-5">
+        <p class="mb-0">There are no credits here.</p>
+        <footer class="blockquote-footer"><cite>Add first</cite></footer>
+      </blockquote>
+    }
+  </div>
+
+  <div class="modal fade" id="creditCardInfo" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalCenterTitle">Credit Card Info</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-4"><strong>Card Number:</strong></div>
+            <div class="col"><cite>@_creditCardInfo.Number</cite></div>
+          </div>
+          <div class="row">
+            <div class="col-4"><strong>PIN:</strong></div>
+            <div class="col"><cite>@_creditCardInfo.PIN</cite></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  @* DELETION MODAL *@
+  <div class="modal fade" id="deleteConfirmation" tabindex="-1" data-backdrop="false">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-body d-flex justify-content-center row">
+          <h1 class="text-center m-5">Do you realy want to close credit?</h1>
+          <div class="btn-group btn-group-lg mb-2">
+            <button type="button" class="btn btn-danger" @onclick="@(async () => { await CreditDeletion(); await ToggleModal("#deleteConfirmation"); })" @onclick:preventDefault>Yes</button>
+            <button type="button" class="btn btn-secondary" @onclick="@(async () => { CloseCreditDto = null; await ToggleModal("#deleteConfirmation"); })" @onclick:preventDefault>No</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+@code
+{
+  private List<CreditDto> _credits;
+  private IReadOnlyList<CreditPlanDto> _creditPlans;
+  private IReadOnlyList<CreditCardDto> _creditCards;
+  private string linkCreditPlanEdit = $"/credit-plan/edit";
+  private string linkCreditEdit = $"/credit/edit";
+
+  private CreditCardDto _creditCardInfo = new CreditCardDto();
+
+  protected override async Task OnInitializedAsync()
+  {
+    await RefreshDepositsTables();
+    await base.OnInitializedAsync();
+  }
+
+  private async Task RefreshDepositsTables()
+  {
+    using var scope = serviceScopeFactory.CreateScope();
+    var creditPlansService = scope.ServiceProvider.GetService<CreditPlansService>();
+    var creditsService = scope.ServiceProvider.GetService<CreditsService>();
+    var creditCardsService = scope.ServiceProvider.GetService<CreditCardsService>();
+
+    _creditPlans = await creditPlansService.GetCreditPlansAsync();
+    _credits = await creditsService.GetCreditsAsync();
+    _creditCards = await creditCardsService.GetCreditCardsAsync();
+  }
+
+  private CreditDto CloseCreditDto;
+
+  private async Task ToggleModal(string modalSelector)
+  {
+    await JSRuntime.InvokeVoidAsync("ShowModal", modalSelector);
+  }
+
+  private async Task CloseCredit(CreditDto credit)
+  {
+    CloseCreditDto = credit;
+    await ToggleModal("#deleteConfirmation");
+  }
+
+  private async Task CreditDeletion()
+  {
+    if (CloseCreditDto is null)
+    {
+      return;
+    }
+
+    using var scope = serviceScopeFactory.CreateScope();
+    var creditsService = scope.ServiceProvider.GetService<CreditsService>();
+    var result = await creditsService.CloseCreditAsync(CloseCreditDto.ID);
+
+    if (result.Success)
+    {
+      CloseCreditDto.Closed = true;
+    }
+
+    CloseCreditDto = null;
+  }
+
+  private async Task ShowModal(CreditDto credit)
+  {
+    using var scope = serviceScopeFactory.CreateScope();
+    var creditCardsService = scope.ServiceProvider.GetService<CreditCardsService>();
+    _creditCardInfo = await creditCardsService.GetCreditCardAsync(credit.ID);
+    await JSRuntime.InvokeVoidAsync("ShowModal", "#creditCardInfo");
+  }
+}

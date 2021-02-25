@@ -1,0 +1,171 @@
+﻿@page "/deposit/edit"
+
+@using Services
+@using DTOs.Deposit
+@using DTOs.Client
+
+@inject ClientsService clientsService
+@inject DepositPlansService depositPlansService
+@inject DepositsService depositsService
+@inject NavigationManager NavigationManager
+
+<div class="container-fluid">
+  <EditForm Model="@_createDeposit" class="card m-5" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+
+    <div class="card-header">Add Deposit</div>
+    <div class="card-body">
+
+      <div class="form-row ml-3 mr-3 mb-3">
+        <div class="col input-group">
+          <div class="input-group-prepend">
+            @if (_createDeposit.ClientID == Guid.Empty)
+            {
+              <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Clients
+              </button>
+            }
+            else
+            {
+              <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                @_clients.First(client => client.ID == _createDeposit.ClientID).IdentificationNumber
+              </button>
+            }
+            <div class="dropdown-menu">
+              @foreach (var client in _clients)
+              {
+                <a class="dropdown-item" @onclick="@(() => _createDeposit.ClientID = client.ID)" @onclick:preventDefault>@client.IdentificationNumber</a>
+              }
+            </div>
+          </div>
+          <InputText class="form-control" disabled @bind-Value="@ClientInfo" />
+        </div>
+      </div>
+
+      <div class="form-row ml-3 mr-3 mb-3">
+        <div class="col input-group">
+          <div class="input-group-prepend">
+            @if (_createDeposit.DepositPlanID == Guid.Empty)
+            {
+              <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Deposit Plans
+              </button>
+            }
+            else
+            {
+              <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                @_depositPlans.First(plan => plan.ID == _createDeposit.DepositPlanID).Name
+              </button>
+            }
+            <div class="dropdown-menu">
+              @foreach (var plan in _depositPlans)
+              {
+                <a class="dropdown-item" @onclick="@(() => _createDeposit.DepositPlanID = plan.ID)" @onclick:preventDefault>@plan.Name</a>
+              }
+            </div>
+          </div>
+          <InputText class="form-control" disabled @bind-Value="@DepositInfo" />
+        </div>
+      </div>
+
+      <div class="form-row ml-3 mr-3 mb-3">
+        <div class="col input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text">Deposit Amount</span>
+          </div>
+          <InputNumber @bind-Value="_createDeposit.Amount" class="form-control" />
+          <div class="input-group-append">
+            <span class="input-group-text">BYR</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    @if (!Result.Success)
+    {
+      <div class="alert alert-danger" role="alert">
+        @Result.Message
+      </div>
+    }
+
+    <ValidationSummary />
+
+    <div class="form-row ml-5 mr-5 mb-3">
+      <button class="btn btn-success btn-l btn-block" type="submit">
+        @if (Spinner)
+        {
+          <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" />
+        }
+        Save
+      </button>
+    </div>
+  </EditForm>
+</div>
+
+@code
+{
+  private IReadOnlyList<ClientDto> _clients = new List<ClientDto>();
+  private IReadOnlyList<DepositPlanDto> _depositPlans = new List<DepositPlanDto>();
+  private CreateDepositDto _createDeposit = new CreateDepositDto();
+  private bool Spinner = false;
+  private PIRIS_labs.DTOs.ResultDto Result = new DTOs.ResultDto { Success = true };
+
+  private string DepositInfo
+  {
+    set { }
+    get
+    {
+      var depositPlan = _depositPlans.FirstOrDefault(depositPlan => depositPlan.ID == _createDeposit.DepositPlanID);
+
+      if (depositPlan is null)
+      {
+        return String.Empty;
+      }
+
+      string recovableStr = depositPlan.Revocable ? "Revocable" : "Not Revocable";
+      return $"{depositPlan.Percent} % — {depositPlan.DayPeriod} days — {recovableStr}";
+    }
+  }
+
+  private string ClientInfo
+  {
+    set { }
+    get
+    {
+      var client = _clients.FirstOrDefault(client => client.ID == _createDeposit.ClientID);
+
+      if (client is null)
+      {
+        return String.Empty;
+      }
+
+      return $"{client.Surname} {client.Name} {client.Patronymic} — {client.PassportSeries}{client.PassportNumber}";
+    }
+  }
+
+  protected override async Task OnInitializedAsync()
+  {
+    Spinner = true;
+
+    _clients = (await clientsService.GetClientsAsync()).ToList();
+    _depositPlans = await depositPlansService.GetDepositPlansAsync();
+
+    Spinner = false;
+
+    await base.OnInitializedAsync();
+  }
+
+  private async Task HandleValidSubmit()
+  {
+    Spinner = true;
+
+    Result = await depositsService.CreateDepositAsync(_createDeposit);
+
+    Spinner = false;
+
+    if (Result.Success)
+    {
+      NavigationManager.NavigateTo("/deposits");
+    }
+  }
+}

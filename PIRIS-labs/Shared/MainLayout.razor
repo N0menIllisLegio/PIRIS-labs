@@ -1,0 +1,33 @@
+﻿@inherits LayoutComponentBase
+
+<div class="page">
+  <div class="sidebar @(NavbarVisible ? String.Empty : "invisible")">
+    <NavMenu />
+  </div>
+
+  <div class="main">
+    <div class="content px-4">
+      @Body
+    </div>
+  </div>
+</div>
+
+@code
+{
+  private static bool NavbarVisible = true;
+
+  public static void ToggleNavBarVisibility()
+  {
+    NavbarVisible = !NavbarVisible;
+  }
+
+  public static void ShowNavBar()
+  {
+    NavbarVisible = true;
+  }
+
+  public static void HideNavBar()
+  {
+    NavbarVisible = false;
+  }
+}

@@ -1,0 +1,264 @@
+﻿@page "/credit/edit"
+
+@using Services
+@using DTOs.Credit
+@using DTOs.Client
+@using Microsoft.Extensions.DependencyInjection
+
+@inject IServiceScopeFactory serviceScopeFactory
+
+@inject NavigationManager NavigationManager
+
+<div class="container-fluid">
+  <EditForm Model="@_createCreditDto" class="card m-5" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+
+    <div class="card-header">Add Credit</div>
+
+    <div class="card-body">
+      <div class="form-row ml-3 mr-3 mb-3">
+        <div class="col input-group">
+          <div class="input-group-prepend">
+            @if (_createCreditDto.ClientID == Guid.Empty)
+            {
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Clients
+            </button>
+            }
+            else
+            {
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              @_clients.First(client => client.ID == _createCreditDto.ClientID).IdentificationNumber
+            </button>
+            }
+            <div class="dropdown-menu">
+              @foreach (var client in _clients)
+              {
+              <a class="dropdown-item" @onclick="@(() => _createCreditDto.ClientID = client.ID)" @onclick:preventDefault>@client.IdentificationNumber</a>
+              }
+            </div>
+          </div>
+          <InputText class="form-control" disabled @bind-Value="@ClientInfo" />
+        </div>
+      </div>
+
+      <div class="form-row ml-3 mr-3 mb-3">
+        <div class="col input-group">
+          <div class="input-group-prepend">
+            @if (_createCreditDto.CreditPlanID == Guid.Empty)
+            {
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Credit Plans
+            </button>
+            }
+            else
+            {
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              @_creditPlans.First(plan => plan.ID == _createCreditDto.CreditPlanID).Name
+            </button>
+            }
+            <div class="dropdown-menu">
+              @foreach (var plan in _creditPlans)
+              {
+              <a class="dropdown-item" @onclick="@(() => _createCreditDto.CreditPlanID = plan.ID)" @onclick:preventDefault>@plan.Name</a>
+              }
+            </div>
+          </div>
+          <InputText class="form-control" disabled @bind-Value="@CreditInfo" />
+        </div>
+      </div>
+
+      <div class="form-row ml-3 mr-3 mb-3">
+        <div class="col input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text">Credit Amount</span>
+          </div>
+          <InputNumber @bind-Value="_createCreditDto.Amount" class="form-control" />
+          <div class="input-group-append">
+            <span class="input-group-text">BYR</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    @if (!Result.Success)
+    {
+    <div class="alert alert-danger" role="alert">
+      @Result.Message
+    </div>
+    }
+
+    <ValidationSummary />
+
+    <div class="form-row ml-5 mr-5 mb-3">
+      <button class="btn btn-primary col-2" type="button" @onclick="@CalculateCreditPaymentPlan">Calculate Payment Percents</button>
+      <button class="btn btn-success btn-l btn-block col ml-2" type="submit">
+        @if (Spinner)
+        {
+        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" />
+        }
+        Save
+      </button>
+    </div>
+  </EditForm>
+
+  <div>
+    @if (_creditPercents is not null && _creditPercents.Count > 0)
+    {
+    <table class="table table-bordered table-hover mb-5">
+      <thead class="thead-dark">
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Payment Date</th>
+          @if (ShowNonAnuityColumn)
+          {
+            <th scope="col">%</th>
+          }
+          <th scope="col">Main Debth</th>
+          <th scope="col">Payment Sum</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        @foreach (var creditPercent in _creditPercents)
+          {
+        <tr>
+          <th scope="row">@creditPercent.RowNumber</th>
+          <td>@creditPercent.Date.ToShortDateString()</td>
+          @if (ShowNonAnuityColumn)
+          {
+            <td>@creditPercent.PercentDebth</td>
+          }
+          <td>@creditPercent.MainDebth</td>
+          <td>@creditPercent.PaymentSum</td>
+        </tr>
+          }
+      </tbody>
+    </table>
+    }
+    else if (CalculatingPercents)
+    {
+    <div class="d-flex justify-content-center m-5">
+      <div class="spinner-border" role="status">
+        <span class="sr-only">Loading...</span>
+      </div>
+    </div>
+    }
+  </div>
+</div>
+
+@code
+{
+  private CreateCreditDto _createCreditDto = new CreateCreditDto();
+  private IReadOnlyList<ClientDto> _clients = new List<ClientDto>();
+  private IReadOnlyList<CreditPlanDto> _creditPlans = new List<CreditPlanDto>();
+  private IReadOnlyList<CreditPercentsDto> _creditPercents;
+  private bool Spinner = false;
+  private bool CalculatingPercents = false;
+  private PIRIS_labs.DTOs.ResultDto Result = new DTOs.ResultDto { Success = true };
+
+  private bool ShowNonAnuityColumn = false;
+
+  private string ClientInfo
+  {
+    set { }
+    get
+    {
+      var client = _clients.FirstOrDefault(client => client.ID == _createCreditDto.ClientID);
+
+      if (client is null)
+      {
+        return String.Empty;
+      }
+
+      return $"{client.Surname} {client.Name} {client.Patronymic} — {client.PassportSeries}{client.PassportNumber}";
+    }
+  }
+
+  private string CreditInfo
+  {
+    set { }
+    get
+    {
+      var creditPlan = _creditPlans.FirstOrDefault(plan => plan.ID == _createCreditDto.CreditPlanID);
+
+      if (creditPlan is null)
+      {
+        return String.Empty;
+      }
+
+      string anuityStr = creditPlan.Anuity ? "Anuity" : "Not Anuity";
+      return $"{creditPlan.Percent} % — {creditPlan.MonthPeriod} months — {anuityStr} — Min amount: {creditPlan.MinAmount.GetValueOrDefault()}";
+    }
+  }
+
+  protected override async Task OnInitializedAsync()
+  {
+    Spinner = true;
+
+    using (var scope = serviceScopeFactory.CreateScope())
+    {
+      var clientsService = scope.ServiceProvider.GetService<ClientsService>();
+      var creditPlansSerivce = scope.ServiceProvider.GetService<CreditPlansService>();
+
+      _clients = (await clientsService.GetClientsAsync()).ToList();
+      _creditPlans = await creditPlansSerivce.GetCreditPlansAsync();
+    }
+
+    Spinner = false;
+
+    await base.OnInitializedAsync();
+  }
+
+  private async Task HandleValidSubmit()
+  {
+    Spinner = true;
+
+    var creditPlan = _creditPlans.FirstOrDefault(plan => plan.ID == _createCreditDto.CreditPlanID);
+
+    if (_createCreditDto.Amount >= creditPlan.MinAmount.GetValueOrDefault())
+    {
+      using var scope = serviceScopeFactory.CreateScope();
+      var creditsSerivce = scope.ServiceProvider.GetService<CreditsService>();
+      Result = await creditsSerivce.CreateCreditAsync(_createCreditDto);
+    }
+    else
+    {
+      Result = new DTOs.ResultDto { Success = false, Message = $"Credit amount should be greater than {creditPlan.MinAmount}" };
+    }
+
+    Spinner = false;
+
+    if (Result.Success)
+    {
+      NavigationManager.NavigateTo("/credits");
+    }
+  }
+
+  private void CalculateCreditPaymentPlan()
+  {
+    _creditPercents = null;
+
+    var creditPlan = _creditPlans.FirstOrDefault(plan => plan.ID == _createCreditDto.CreditPlanID);
+
+    if (creditPlan is not null)
+    {
+      if (_createCreditDto.Amount >= creditPlan.MinAmount.GetValueOrDefault())
+      {
+        ShowNonAnuityColumn = !creditPlan.Anuity;
+        CalculatingPercents = true;
+        using var scope = serviceScopeFactory.CreateScope();
+        var creditsSerivce = scope.ServiceProvider.GetService<CreditsService>();
+        var dateSerivce = scope.ServiceProvider.GetService<DateService>();
+        _creditPercents = creditsSerivce.CalculateCreditPaymentPlan(_createCreditDto.Amount, creditPlan.Percent,
+          creditPlan.MonthPeriod, creditPlan.Anuity, dateSerivce.Today);
+
+        CalculatingPercents = false;
+      }
+      else
+      {
+        Result = new DTOs.ResultDto { Success = false, Message = $"Credit amount should be greater than {creditPlan.MinAmount}" };
+      }
+    }
+  }
+}

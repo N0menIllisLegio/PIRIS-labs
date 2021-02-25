@@ -1,0 +1,385 @@
+﻿@page "/atm/insert-credit-card"
+
+@using Services
+@using DTOs.ATM
+@using DTOs
+@using Microsoft.Extensions.DependencyInjection
+@using Microsoft.JSInterop
+
+@inject IJSRuntime JSRuntime
+
+@inject IServiceScopeFactory serviceScopeFactory
+
+@inject NavigationManager NavigationManager
+
+<div class="container-fluid">
+  <div class="row d-flex justify-content-center">
+    <div class="col-4" style="margin-top: 250px">
+      <EditForm Model="@_creditCardDto" OnValidSubmit="@OnCardSubmited">
+        <DataAnnotationsValidator />
+        <div class="card shadow mb-4">
+          <div class="card-header text-center">
+            Credit card
+          </div>
+          <div class="card-body">
+            <div class="input-group mb-3">
+              <div class="input-group-prepend">
+                <span class="input-group-text">Number</span>
+              </div>
+              <InputText class="form-control" @bind-Value="@_creditCardDto.Number" maxlength="16" />
+            </div>
+            <div class="input-group">
+              <div class="input-group-prepend">
+                <span class="input-group-text">PIN</span>
+              </div>
+              <InputText class="form-control" @bind-Value="@_creditCardDto.PIN" type="password" maxlength="4" />
+            </div>
+          </div>
+          <div class="card-footer text-center p-1">
+            <button type="submit" class="btn btn-link">Submit card</button>
+          </div>
+        </div>
+        <ValidationSummary />
+      </EditForm>
+    </div>
+  </div>
+
+  <div class="toast alert alert-danger m-5" style="position: fixed; bottom: 0; right: 0;" data-delay="3500">
+    <div class="toast-header">
+      <strong class="mr-auto">Error!</strong>
+      <small>@(DateTime.Now.ToShortTimeString())</small>
+    </div>
+    <div class="toast-body">
+      Card number or password isn't valid!
+    </div>
+  </div>
+
+  @* MAIN MENU MODAL *@
+  <div class="modal fade" id="atmMainMenu" tabindex="-1" data-backdrop="false">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header d-flex justify-content-center"><h3 class="modal-title">ATM</h3></div>
+        <div class="modal-body d-flex justify-content-center row">
+          <h1 class="m-5">Welcome!</h1>
+
+          <div class="btn-group btn-group mt-3">
+            <button type="button" class="btn btn-primary" @onclick="@(() => OpenNextModal("#atmMainMenu", "#atmEnterAmount"))" @onclick:preventDefault>Cash Withdrawal</button>
+            <button type="button" class="btn btn-primary" @onclick="@(() => OpenNextModal("#atmMainMenu", "#atmEnterAmounMobile"))" @onclick:preventDefault>Mobile Phone</button>
+            <button type="button" class="btn btn-primary" @onclick="@BalanceInquiry" @onclick:preventDefault>Balance Inquiry</button>
+            <button type="button" class="btn btn-danger" @onclick="@(() => ToggleModal("#atmMainMenu"))" @onclick:preventDefault>Quit</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  @* CONTINUE WORK MODAL *@
+  <div class="modal fade" id="atmContinueWork" tabindex="-1" data-backdrop="false">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header d-flex justify-content-center"><h3 class="modal-title">ATM</h3></div>
+        <div class="modal-body d-flex justify-content-center row">
+          <h1 class="m-5">Continue work on ATM?</h1>
+
+          <div class="btn-group btn-group-lg mt-5">
+            <button type="button" class="btn btn-primary" @onclick="@(() => OpenNextModal("#atmContinueWork", "#atmMainMenu"))" @onclick:preventDefault>Continue</button>
+            <button type="button" class="btn btn-danger" @onclick="@(() => ToggleModal("#atmContinueWork"))" @onclick:preventDefault>Quit</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  @* BALANCE INQURY MODAL *@
+  <div class="modal fade" id="atmBlanceInquiryResult" tabindex="-1" data-backdrop="false">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header d-flex justify-content-center"><h3 class="modal-title">ATM</h3></div>
+        <div class="modal-body">
+          <h1 class="m-5 row d-flex justify-content-center">Blance: @BlanceInquiryResult.Balance</h1>
+
+          <h4 class="row d-flex justify-content-center">Print receipt?</h4>
+
+          <div class="btn-group btn-group-lg mt-5 m-3 row d-flex justify-content-center">
+            <button type="button" class="btn btn-primary" @onclick="@(() => OpenNextModal("#atmBlanceInquiryResult", "#atmPrintReceipt"))" @onclick:preventDefault>Yes</button>
+            <button type="button" class="btn btn-danger" @onclick="@(() => OpenNextModal("#atmBlanceInquiryResult", "#atmContinueWork"))" @onclick:preventDefault>No</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  @*PRINT RECEIPT MODAL*@
+  <div class="modal fade" id="atmPrintReceipt" tabindex="-1" data-backdrop="false">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header d-flex justify-content-center"><h3 class="modal-title">ATM</h3></div>
+        <div class="modal-body">
+          <h1 class="m-5 row d-flex justify-content-center">Receipt</h1>
+
+          <div class="ml-5 mr-5">
+            <div class="row">
+              <strong class="col-5">Card Number:</strong>
+              <div class="col">@BlanceInquiryResult.Number</div>
+            </div>
+            <div class="row">
+              <strong class="col-5">Card Holder:</strong>
+              <div class="col">@BlanceInquiryResult.ClientFullName</div>
+            </div>
+            <div class="row">
+              <strong class="col-5">Balance:</strong>
+              <div class="col">@BlanceInquiryResult.Balance</div>
+            </div>
+          </div>
+
+          <div class="btn-group btn-group-lg mt-5 m-3 row d-flex justify-content-center">
+            <button type="button" class="btn btn-danger" @onclick="@(() => OpenNextModal("#atmPrintReceipt", "#atmContinueWork"))" @onclick:preventDefault>OK</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  @* ENTER AMOUNT MODAL *@
+  <div class="modal fade" id="atmEnterAmount" tabindex="-1" data-backdrop="false">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header d-flex justify-content-center"><h3 class="modal-title">ATM</h3></div>
+        <div class="modal-body">
+          <h1 class="m-5 row d-flex justify-content-center text-center">Enter withdrawal amount</h1>
+
+          <EditForm Model="@InputNumberResult" OnValidSubmit="@CashWithdrawal">
+            <DataAnnotationsValidator />
+
+            <div class="form-group row">
+              <InputNumber @bind-Value="@InputNumberResult.Number" class="form-control mr-5 ml-5 mb-3 col" />
+            </div>
+
+            <ValidationSummary />
+
+            <div class="btn-group btn-group-lg m-3 row d-flex justify-content-center">
+              <button type="submit" class="btn btn-success">OK</button>
+              <button type="button" class="btn btn-danger" @onclick="@(() => OpenNextModal("#atmEnterAmount", "#atmMainMenu"))" @onclick:preventDefault>Cancel</button>
+            </div>
+          </EditForm>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  @*ERROR MODAL*@
+  <div class="modal fade" id="atmError" tabindex="-1" data-backdrop="false">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header d-flex justify-content-center"><h3 class="modal-title">ATM</h3></div>
+        <div class="modal-body">
+          <h1 class="m-5 row d-flex justify-content-center">Error!</h1>
+
+          <div class="ml-5 mr-5 alert alert-danger">
+            @Result.Message
+          </div>
+
+          <div class="btn-group btn-group-lg mt-5 m-3 row d-flex justify-content-center">
+            <button type="button" class="btn btn-danger" @onclick="@(() => OpenNextModal("#atmError", "#atmMainMenu"))" @onclick:preventDefault>OK</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  @* CASH WITHDRAWED MODAL *@
+  <div class="modal fade" id="atmCashWithdrawed" tabindex="-1" data-backdrop="false">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header d-flex justify-content-center"><h3 class="modal-title">ATM</h3></div>
+        <div class="modal-body">
+          <h1 class="row d-flex justify-content-center text-center">Cash withdrawed successfully.</h1>
+
+          <h4 class="row d-flex justify-content-center text-center">Print receipt?</h4>
+
+          <div class="btn-group btn-group-lg mt-5 m-3 row d-flex justify-content-center">
+            <button type="button" class="btn btn-primary" @onclick="@PrintCashWithdrawalReceipt" @onclick:preventDefault>Yes</button>
+            <button type="button" class="btn btn-danger" @onclick="@(() => OpenNextModal("#atmCashWithdrawed", "#atmMainMenu"))" @onclick:preventDefault>No</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  @* PRINT CASH WITHDRAWL RECEIPT *@
+  <div class="modal fade" id="atmPrintCashWithdrawlReceipt" tabindex="-1" data-backdrop="false">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header d-flex justify-content-center"><h3 class="modal-title">ATM</h3></div>
+        <div class="modal-body">
+          <h1 class="m-5 row d-flex justify-content-center">Receipt</h1>
+
+          <div class="ml-5 mr-5">
+            <div class="row">
+              <strong class="col-6">Card Number:</strong>
+              <div class="col">@CashWithdrawlResult.Number</div>
+            </div>
+            <div class="row mb-2">
+              <strong class="col-6">Card Holder:</strong>
+              <div class="col">@CashWithdrawlResult.ClientFullName</div>
+            </div>
+            <div class="row">
+              <strong class="col-6">Transaction Date:</strong>
+              <div class="col">@CashWithdrawlResult.TransactionTime.ToShortDateString()</div>
+            </div>
+            <div class="row">
+              <strong class="col-6">Credit Account:</strong>
+              <div class="col">@CashWithdrawlResult.CreditAccountNumber</div>
+            </div>
+            <div class="row">
+              <strong class="col-6">Transaction Amount:</strong>
+              <div class="col">@CashWithdrawlResult.Amount</div>
+            </div>
+          </div>
+
+          <div class="btn-group btn-group-lg mt-5 m-3 row d-flex justify-content-center">
+            <button type="button" class="btn btn-danger" @onclick="@(() => OpenNextModal("#atmPrintCashWithdrawlReceipt", "#atmMainMenu"))" @onclick:preventDefault>OK</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  @* MOBILE PHONE MODAL *@
+  <div class="modal fade" id="atmEnterAmounMobile" tabindex="-1" data-backdrop="false">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header d-flex justify-content-center"><h3 class="modal-title">ATM</h3></div>
+        <div class="modal-body">
+          <EditForm Model="@mobilePhoneDto" OnValidSubmit="@MobileBalance">
+            <DataAnnotationsValidator />
+            <div class="input-group form-row ml-1 col-11">
+              <div class="input-group-prepend">
+                <span class="input-group-text">Phone Number</span>
+              </div>
+
+              <InputText @bind-Value="@mobilePhoneDto.MobilePhoneNumber" class="form-control" placeholder="+375xxxxxxxxx" />
+            </div>
+
+            <div class="input-group form-row mt-3 ml-1 col-11">
+              <div class="input-group-prepend">
+                <span class="input-group-text">Amount</span>
+              </div>
+
+              <InputNumber @bind-Value="@mobilePhoneDto.Amount" class="form-control" />
+            </div>
+
+            <ValidationSummary />
+
+            <div class="btn-group btn-group-lg m-3 row d-flex justify-content-center">
+              <button type="submit" class="btn btn-success">OK</button>
+              <button type="button"
+                      class="btn btn-danger"
+                      @onclick="@(() => OpenNextModal("#atmEnterAmounMobile", "#atmMainMenu"))"
+                      @onclick:preventDefault>
+                Cancel
+              </button>
+            </div>
+          </EditForm>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+@code
+{
+  private CreditCardDto _creditCardDto = new CreditCardDto();
+  private bool CardInserted = false;
+
+  private async Task OnCardSubmited()
+  {
+    using var scope = serviceScopeFactory.CreateScope();
+    var creditCardsService = scope.ServiceProvider.GetService<CreditCardsService>();
+
+    bool result = await creditCardsService.Authenticate(_creditCardDto);
+
+    if (result)
+    {
+      await JSRuntime.InvokeVoidAsync("ShowModal", "#atmMainMenu");
+    }
+    else
+    {
+      await JSRuntime.InvokeVoidAsync("ShowToast", ".toast");
+    }
+  }
+
+  private InputNumberDto InputNumberResult = new InputNumberDto();
+  private ResultDto Result = new ResultDto();
+
+  private async Task CashWithdrawal()
+  {
+    using var scope = serviceScopeFactory.CreateScope();
+    var creditCardsService = scope.ServiceProvider.GetService<CreditCardsService>();
+
+    Result = await creditCardsService.WithdrawCash(_creditCardDto, InputNumberResult.Number);
+
+    if (Result.Success)
+    {
+      LastTransactionID = Guid.Parse(Result.Message);
+      Result.Message = String.Empty;
+      await OpenNextModal("#atmEnterAmount", "#atmCashWithdrawed");
+    }
+    else
+    {
+      await OpenNextModal("#atmEnterAmount", "#atmError");
+    }
+  }
+
+  private Guid LastTransactionID;
+  private CashWithdrawlDto CashWithdrawlResult = new CashWithdrawlDto();
+
+  private async Task PrintCashWithdrawalReceipt()
+  {
+    using var scope = serviceScopeFactory.CreateScope();
+    var creditCardsService = scope.ServiceProvider.GetService<CreditCardsService>();
+    CashWithdrawlResult = await creditCardsService.GetCashWithdrawlDtoAsync(_creditCardDto, LastTransactionID);
+
+    await OpenNextModal("#atmCashWithdrawed", "#atmPrintCashWithdrawlReceipt");
+  }
+
+  private BalanceInquiryDto BlanceInquiryResult = new BalanceInquiryDto();
+
+  private async Task BalanceInquiry()
+  {
+    using var scope = serviceScopeFactory.CreateScope();
+    var creditCardsService = scope.ServiceProvider.GetService<CreditCardsService>();
+    BlanceInquiryResult = await creditCardsService.InquiryBalace(_creditCardDto);
+    await OpenNextModal("#atmMainMenu", "#atmBlanceInquiryResult");
+  }
+
+  private async Task ToggleModal(string modalSelector)
+  {
+    await JSRuntime.InvokeVoidAsync("ShowModal", modalSelector);
+  }
+
+  private async Task OpenNextModal(string previousModalSelector, string nextModalSelector)
+  {
+    await ToggleModal(previousModalSelector);
+    await ToggleModal(nextModalSelector);
+  }
+
+  private AtmMobilePhoneDto mobilePhoneDto = new AtmMobilePhoneDto();
+
+  private async Task MobileBalance()
+  {
+    using var scope = serviceScopeFactory.CreateScope();
+    var creditCardsService = scope.ServiceProvider.GetService<CreditCardsService>();
+
+    Result = await creditCardsService.PutMoneyOnMobilePhone(_creditCardDto, mobilePhoneDto);
+
+    if (Result.Success)
+    {
+      await OpenNextModal("#atmEnterAmounMobile", "#atmMainMenu");
+    }
+    else
+    {
+      await OpenNextModal("#atmEnterAmounMobile", "#atmError");
+    }
+  }
+}

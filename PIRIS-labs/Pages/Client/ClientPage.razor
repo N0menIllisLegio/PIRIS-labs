@@ -1,0 +1,131 @@
+﻿@page "/client/{ClientID:guid}"
+
+@using Services
+@using DTOs.Client
+
+@inject ClientsService clientsService
+@inject NavigationManager NavigationManager
+
+<div class="container">
+  <h1 class="m-5">Client Info</h1>
+  <div class="card mb-5">
+    @if (client is null)
+    {
+      <div class="d-flex justify-content-center m-5  text-right">
+        <div class="spinner-border" role="status">
+          <span class="sr-only">Loading...</span>
+        </div>
+      </div>
+    }
+    else
+    {
+      <dl class="row card-body">
+        <dt class="col-sm-5  text-right text-truncate">Surname</dt>
+        <dd class=" col-sm-7 clientInfoStyle"><em>@client.Surname</em></dd>
+        <dt class="col-sm-5  text-right text-truncate">Name</dt>
+        <dd class=" col-sm-7 clientInfoStyle"><em>@client.Name</em></dd>
+        <dt class="col-sm-5  text-right text-truncate">Patronymic</dt>
+        <dd class=" col-sm-7 clientInfoStyle"><em>@client.Patronymic</em></dd>
+        <dt class="col-sm-5  text-right text-truncate">Birthday</dt>
+        <dd class=" col-sm-7 clientInfoStyle"><em>@client.Birthday.ToShortDateString()</em></dd>
+        <dt class="col-sm-5  text-right text-truncate">Gender</dt>
+        <dd class=" col-sm-7 clientInfoStyle"><em>@client.Gender</em></dd>
+        <dt class="col-sm-5  text-right text-truncate">Place of birth</dt>
+        <dd class=" col-sm-7 clientInfoStyle"><em>@client.BirthPlace</em></dd>
+        <dt class="col-sm-5  text-right text-truncate">City of actual residence</dt>
+        <dd class=" col-sm-7 clientInfoStyle"><em>@client.ActualResidenceCityName</em></dd>
+        <dt class="col-sm-5  text-right text-truncate">Address of actual residence</dt>
+        <dd class=" col-sm-7 clientInfoStyle"><em>@client.ActualResidenceAddress</em></dd>
+        <dt class="col-sm-5  text-right text-truncate">City of registration</dt>
+        <dd class=" col-sm-7 clientInfoStyle"><em>@client.RegistrationCityName</em></dd>
+        <dt class="col-sm-5  text-right text-truncate">Address of registration</dt>
+        <dd class=" col-sm-7 clientInfoStyle"><em>@client.RegistrationAddress</em></dd>
+        <dt class="col-sm-5  text-right text-truncate">Home phone</dt>
+        <dd class=" col-sm-7 clientInfoStyle">
+          @if (String.IsNullOrEmpty(client.HomePhoneNumber))
+          {<em>—</em>}
+          else
+          {<em>@client.HomePhoneNumber</em>}
+        </dd>
+        <dt class="col-sm-5  text-right text-truncate">Mobile phone</dt>
+        <dd class=" col-sm-7 clientInfoStyle">
+          @if (String.IsNullOrEmpty(client.MobilePhoneNumber))
+          {<em>—</em>}
+          else
+          {<em>@client.MobilePhoneNumber</em>}
+        </dd>
+        <dt class="col-sm-5  text-right text-truncate">Email</dt>
+        <dd class=" col-sm-7 clientInfoStyle">
+          @if (String.IsNullOrEmpty(client.Email))
+          {<em>—</em>}
+          else
+          {<em>@client.Email</em>}
+        </dd>
+        <dt class="col-sm-5  text-right text-truncate">Passport</dt>
+        <dd class=" col-sm-7 clientInfoStyle"><em>@client.PassportSeries@client.PassportNumber</em></dd>
+        <dt class="col-sm-5  text-right text-truncate">Passport issued by</dt>
+        <dd class=" col-sm-7 clientInfoStyle"><em>@client.PassportIssuedBy</em></dd>
+        <dt class="col-sm-5  text-right text-truncate">Passport issued date</dt>
+        <dd class=" col-sm-7 clientInfoStyle"><em>@client.PassportIssuedDate</em></dd>
+        <dt class="col-sm-5  text-right text-truncate">Identification number</dt>
+        <dd class=" col-sm-7 clientInfoStyle"><em>@client.IdentificationNumber</em></dd>
+        <dt class="col-sm-5  text-right text-truncate">Place of work</dt>
+        <dd class=" col-sm-7 clientInfoStyle">
+          @if (String.IsNullOrEmpty(client.WorkPlace))
+          {<em>—</em>}
+          else
+          {<em>@client.WorkPlace</em>}
+        </dd>
+        <dt class="col-sm-5  text-right text-truncate">Position</dt>
+        <dd class=" col-sm-7 clientInfoStyle">
+          @if (String.IsNullOrEmpty(client.Position))
+          {<em>—</em>}
+          else
+          {<em>@client.Position</em>}
+        </dd>
+        <dt class="col-sm-5  text-right text-truncate">Marital status</dt>
+        <dd class=" col-sm-7 clientInfoStyle"><em>@client.MaritalStatusName</em></dd>
+        <dt class="col-sm-5  text-right text-truncate">Nationality</dt>
+        <dd class=" col-sm-7 clientInfoStyle"><em>@client.NationalityName</em></dd>
+        <dt class="col-sm-5  text-right text-truncate">Disability</dt>
+        <dd class=" col-sm-7 clientInfoStyle"><em>@client.DisabilityName</em></dd>
+        <dt class="col-sm-5  text-right text-truncate">Monthly income</dt>
+        <dd class=" col-sm-7 clientInfoStyle">
+          @if (client.MonthlyIncome is null)
+          {<em>—</em>}
+          else
+          {<em>@client.MonthlyIncome</em>}
+        </dd>
+        <dt class="col-sm-5  text-right text-truncate">Pensioner</dt>
+        <dd class=" col-sm-7 clientInfoStyle">
+          @if (client.Pensioner)
+          {<em>Yes</em>}
+          else
+          {<em>No</em>}
+        </dd>
+        <dt class="col-sm-5  text-right text-truncate">Liable for military service</dt>
+        <dd class=" col-sm-7 clientInfoStyle">
+          @if (client.LiableForMilitaryService)
+          {<em>Yes</em>}
+          else
+          {<em>No</em>}
+        </dd>
+      </dl>
+    }
+  </div>
+</div>
+
+@code
+{
+  [Parameter]
+  public Guid ClientID { get; set; }
+
+  private ClientDto client = null;
+
+  protected override async Task OnParametersSetAsync()
+  {
+    client = await clientsService.GetClientAsync(ClientID);
+
+    await base.OnParametersSetAsync();
+  }
+}

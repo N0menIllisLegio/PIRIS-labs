@@ -1,0 +1,119 @@
+﻿@page "/credit-plan/edit"
+
+@using Services
+@using DTOs.Credit
+@using Microsoft.Extensions.DependencyInjection
+@using Microsoft.JSInterop
+
+@inject IJSRuntime JSRuntime
+@inject IServiceScopeFactory serviceScopeFactory
+
+@inject IServiceScopeFactory serviceScopeFactory
+@inject NavigationManager NavigationManager
+
+<div class="container-fluid">
+  <EditForm Model="@_creditPlanDto" class="card m-5" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <div class="card-header">Add Credit Plan</div>
+    <div class="card-body">
+      <div class="form-row ml-3 mr-3 mb-3">
+        <div class="col input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text">Credit Plan Name</span>
+          </div>
+          <InputText @bind-Value="_creditPlanDto.Name" class="form-control" />
+        </div>
+      </div>
+      <div class="form-row ml-3 mr-3 mb-3">
+        <div class="col input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text">Period</span>
+          </div>
+          <InputNumber @bind-Value="_creditPlanDto.MonthPeriod" class="form-control" />
+          <div class="input-group-append">
+            <span class="input-group-text">months</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-row ml-3 mr-3 mb-3">
+        <div class="col input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text">Percent a year</span>
+          </div>
+          <InputNumber @bind-Value="_creditPlanDto.Percent" class="form-control" />
+          <div class="input-group-append">
+            <span class="input-group-text">%</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-row ml-3 mr-3 mb-3">
+        <div class="col input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text">Minimum amount</span>
+          </div>
+          <InputNumber @bind-Value="_creditPlanDto.MinAmount" class="form-control" />
+          <div class="input-group-append">
+            <span class="input-group-text">BYR</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-row ml-5 mr-3">
+        <div class="col form-check">
+          <InputCheckbox class="form-check-input" id="revocableCheck" @bind-Value="_creditPlanDto.Anuity" />
+          <label class="form-check-label" for="revocableCheck">
+            Aunity
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <ValidationSummary />
+
+    <div class="form-row ml-5 mr-5">
+      <button class="btn btn-success btn-l btn-block mb-5" type="submit">
+        @if (Spinner)
+        {
+          <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" />
+        }
+        Save
+      </button>
+    </div>
+  </EditForm>
+
+  <div class="toast alert alert-danger m-5" style="position: absolute; bottom: 0; right: 0;" data-delay="3500">
+    <div class="toast-header">
+      <strong class="mr-auto">Error!</strong>
+      <small>@(DateTime.Now.ToShortTimeString())</small>
+    </div>
+    <div class="toast-body">
+      @Result.Message
+    </div>
+  </div>
+</div>
+
+@code
+{
+  private CreditPlanDto _creditPlanDto = new CreditPlanDto();
+  private bool Spinner = false;
+  private DTOs.ResultDto Result = new DTOs.ResultDto { Success = true };
+
+  private async Task HandleValidSubmit()
+  {
+    Spinner = true;
+    using var scope = serviceScopeFactory.CreateScope();
+    var creditPlansService = scope.ServiceProvider.GetService<CreditPlansService>();
+
+    Result = await creditPlansService.CreateCreditPlanAsync(_creditPlanDto);
+
+    Spinner = false;
+
+    if (Result.Success)
+    {
+      NavigationManager.NavigateTo("/credits");
+    }
+    else
+    {
+      await JSRuntime.InvokeVoidAsync("ShowToast", ".toast");
+    }
+  }
+}
