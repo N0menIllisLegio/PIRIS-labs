@@ -136,7 +136,7 @@
     else
     {
       <blockquote class="blockquote m-5">
-        <p class="mb-0">There are no deposit plans here.</p>
+        <p class="mb-0">There are no credits here.</p>
         <footer class="blockquote-footer"><cite>Add first</cite></footer>
       </blockquote>
     }
@@ -159,6 +159,21 @@
           <div class="row">
             <div class="col-4"><strong>PIN:</strong></div>
             <div class="col"><cite>@_creditCardInfo.PIN</cite></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  @* DELETION MODAL *@
+  <div class="modal fade" id="deleteConfirmation" tabindex="-1" data-backdrop="false">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-body d-flex justify-content-center row">
+          <h1 class="text-center m-5">Do you realy want to close credit?</h1>
+          <div class="btn-group btn-group-lg mb-2">
+            <button type="button" class="btn btn-danger" @onclick="@(async () => { await CreditDeletion(); await ToggleModal("#deleteConfirmation"); })" @onclick:preventDefault>Yes</button>
+            <button type="button" class="btn btn-secondary" @onclick="@(async () => { CloseCreditDto = null; await ToggleModal("#deleteConfirmation"); })" @onclick:preventDefault>No</button>
           </div>
         </div>
       </div>
@@ -194,16 +209,36 @@
     _creditCards = await creditCardsService.GetCreditCardsAsync();
   }
 
+  private CreditDto CloseCreditDto;
+
+  private async Task ToggleModal(string modalSelector)
+  {
+    await JSRuntime.InvokeVoidAsync("ShowModal", modalSelector);
+  }
+
   private async Task CloseCredit(CreditDto credit)
   {
+    CloseCreditDto = credit;
+    await ToggleModal("#deleteConfirmation");
+  }
+
+  private async Task CreditDeletion()
+  {
+    if (CloseCreditDto is null)
+    {
+      return;
+    }
+
     using var scope = serviceScopeFactory.CreateScope();
     var creditsService = scope.ServiceProvider.GetService<CreditsService>();
-    var result = await creditsService.CloseCreditAsync(credit.ID);
+    var result = await creditsService.CloseCreditAsync(CloseCreditDto.ID);
 
     if (result.Success)
     {
-      credit.Closed = true;
+      CloseCreditDto.Closed = true;
     }
+
+    CloseCreditDto = null;
   }
 
   private async Task ShowModal(CreditDto credit)

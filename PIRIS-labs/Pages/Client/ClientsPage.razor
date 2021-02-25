@@ -80,6 +80,21 @@
       @Result.Message
     </div>
   </div>
+
+  @* DELETION MODAL *@
+  <div class="modal fade" id="deleteConfirmation" tabindex="-1" data-backdrop="false">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-body d-flex justify-content-center row">
+          <h1 class="text-center m-5">Do you realy want to delete client?</h1>
+          <div class="btn-group btn-group-lg mb-2">
+            <button type="button" class="btn btn-danger" @onclick="@(async () => { await ClientDeletion(); await ToggleModal("#deleteConfirmation"); })" @onclick:preventDefault>Yes</button>
+            <button type="button" class="btn btn-secondary" @onclick="@(async () => { DeleteClientID = Guid.Empty; await ToggleModal("#deleteConfirmation"); })" @onclick:preventDefault>No</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 @code
@@ -111,20 +126,40 @@
     NavigationManager.NavigateTo($"/client/edit/{clientID}");
   }
 
+  private async Task ToggleModal(string modalSelector)
+  {
+    await JSRuntime.InvokeVoidAsync("ShowModal", modalSelector);
+  }
+
+  private Guid DeleteClientID = Guid.Empty;
+
   private async Task DeleteClient(Guid clientID)
   {
+    DeleteClientID = clientID;
+    await ToggleModal("#deleteConfirmation");
+  }
+
+  private async Task ClientDeletion()
+  {
+    if (DeleteClientID == Guid.Empty)
+    {
+      return;
+    }
+
     using var scope = serviceScopeFactory.CreateScope();
     var clientsService = scope.ServiceProvider.GetService<ClientsService>();
-    Result = await clientsService.DeleteClient(clientID);
+    Result = await clientsService.DeleteClient(DeleteClientID);
 
     if (Result.Success)
     {
-      var client = _clients.First(client => client.ID == clientID);
+      var client = _clients.First(client => client.ID == DeleteClientID);
       _clients.Remove(client);
     }
     else
     {
       await JSRuntime.InvokeVoidAsync("ShowToast", ".toast");
     }
+
+    DeleteClientID = Guid.Empty;
   }
 }

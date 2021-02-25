@@ -14,7 +14,7 @@
 
 <div class="container-fluid">
   <div class="row d-flex justify-content-center">
-    <div class="col-3" style="margin-top: 250px">
+    <div class="col-4" style="margin-top: 250px">
       <EditForm Model="@_creditCardDto" OnValidSubmit="@OnCardSubmited">
         <DataAnnotationsValidator />
         <div class="card shadow mb-4">
@@ -62,8 +62,9 @@
         <div class="modal-body d-flex justify-content-center row">
           <h1 class="m-5">Welcome!</h1>
 
-          <div class="btn-group btn-group-lg mt-5">
+          <div class="btn-group btn-group mt-3">
             <button type="button" class="btn btn-primary" @onclick="@(() => OpenNextModal("#atmMainMenu", "#atmEnterAmount"))" @onclick:preventDefault>Cash Withdrawal</button>
+            <button type="button" class="btn btn-primary" @onclick="@(() => OpenNextModal("#atmMainMenu", "#atmEnterAmounMobile"))" @onclick:preventDefault>Mobile Phone</button>
             <button type="button" class="btn btn-primary" @onclick="@BalanceInquiry" @onclick:preventDefault>Balance Inquiry</button>
             <button type="button" class="btn btn-danger" @onclick="@(() => ToggleModal("#atmMainMenu"))" @onclick:preventDefault>Quit</button>
           </div>
@@ -243,6 +244,47 @@
       </div>
     </div>
   </div>
+
+  @* MOBILE PHONE MODAL *@
+  <div class="modal fade" id="atmEnterAmounMobile" tabindex="-1" data-backdrop="false">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header d-flex justify-content-center"><h3 class="modal-title">ATM</h3></div>
+        <div class="modal-body">
+          <EditForm Model="@mobilePhoneDto" OnValidSubmit="@MobileBalance">
+            <DataAnnotationsValidator />
+            <div class="input-group form-row ml-1 col-11">
+              <div class="input-group-prepend">
+                <span class="input-group-text">Phone Number</span>
+              </div>
+
+              <InputText @bind-Value="@mobilePhoneDto.MobilePhoneNumber" class="form-control" placeholder="+375xxxxxxxxx" />
+            </div>
+
+            <div class="input-group form-row mt-3 ml-1 col-11">
+              <div class="input-group-prepend">
+                <span class="input-group-text">Amount</span>
+              </div>
+
+              <InputNumber @bind-Value="@mobilePhoneDto.Amount" class="form-control" />
+            </div>
+
+            <ValidationSummary />
+
+            <div class="btn-group btn-group-lg m-3 row d-flex justify-content-center">
+              <button type="submit" class="btn btn-success">OK</button>
+              <button type="button"
+                      class="btn btn-danger"
+                      @onclick="@(() => OpenNextModal("#atmEnterAmounMobile", "#atmMainMenu"))"
+                      @onclick:preventDefault>
+                Cancel
+              </button>
+            </div>
+          </EditForm>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 @code
@@ -320,5 +362,24 @@
   {
     await ToggleModal(previousModalSelector);
     await ToggleModal(nextModalSelector);
+  }
+
+  private AtmMobilePhoneDto mobilePhoneDto = new AtmMobilePhoneDto();
+
+  private async Task MobileBalance()
+  {
+    using var scope = serviceScopeFactory.CreateScope();
+    var creditCardsService = scope.ServiceProvider.GetService<CreditCardsService>();
+
+    Result = await creditCardsService.PutMoneyOnMobilePhone(_creditCardDto, mobilePhoneDto);
+
+    if (Result.Success)
+    {
+      await OpenNextModal("#atmEnterAmounMobile", "#atmMainMenu");
+    }
+    else
+    {
+      await OpenNextModal("#atmEnterAmounMobile", "#atmError");
+    }
   }
 }

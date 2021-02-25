@@ -92,6 +92,29 @@ namespace PIRIS_labs.Services
       };
     }
 
+    public async Task<ResultDto> PutMoneyOnMobilePhone(CreditCardDto creditCardDto, AtmMobilePhoneDto mobilePhoneDto)
+    {
+      var creditCard = await _unitOfWork.CreditCards.GetFirstWhereAsync(card => card.Number == creditCardDto.Number);
+
+      if (creditCard.CreditAccount.Balance < mobilePhoneDto.Amount)
+      {
+        return new ResultDto
+        {
+          Success = false,
+          Message = "Insufficient funds."
+        };
+      }
+
+      var cashboxAccount = await _unitOfWork.Accounts.GetBankCashboxAccount();
+
+      var transaction = await _transactionsService.CreateTransaction(creditCard.CreditAccount, cashboxAccount, mobilePhoneDto.Amount);
+      cashboxAccount.CreditValue += mobilePhoneDto.Amount;
+
+      await _unitOfWork.SaveAsync();
+
+      return new ResultDto { Success = true, Message = transaction.ID.ToString() };
+    }
+
     public async Task<bool> Authenticate(CreditCardDto creditCardDto)
     {
       var creditCard = await _unitOfWork.CreditCards.GetFirstWhereAsync(card => card.Number == creditCardDto.Number);

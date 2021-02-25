@@ -3,6 +3,9 @@
 @using Services
 @using DTOs.Deposit
 @using Microsoft.Extensions.DependencyInjection
+@using Microsoft.JSInterop
+
+@inject IJSRuntime JSRuntime
 
 @inject IServiceScopeFactory serviceScopeFactory
 
@@ -89,28 +92,28 @@
         <tbody>
           @foreach (var deposit in _deposits)
           {
-          <tr class="@(deposit.Closed ? "alert alert-secondary" : String.Empty)">
-            <th scope="row">@deposit.DepositPlan</th>
-            <td>@deposit.Client</td>
-            <td>@deposit.EndDate.ToShortDateString()</td>
-            <td>@deposit.Amount</td>
-            @if (!deposit.Closed)
-            {
-              <td>@deposit.AccumulatedAmount</td>
-            }
-            else
-            {
-              <td>—</td>
-            }
-            @if (!deposit.Closed && deposit.Revocable)
-            {
-              <td class="pointerCursor alert alert-danger" @onclick="@(() => CloseDeposit(deposit))" @onclick:preventDefault><span class="fa fa-window-close" /></td>
-            }
-            else
-            {
-              <td>—</td>
-            }
-          </tr>
+            <tr class="@(deposit.Closed ? "alert alert-secondary" : String.Empty)">
+              <th scope="row">@deposit.DepositPlan</th>
+              <td>@deposit.Client</td>
+              <td>@deposit.EndDate.ToShortDateString()</td>
+              <td>@deposit.Amount</td>
+              @if (!deposit.Closed)
+              {
+                <td>@deposit.AccumulatedAmount</td>
+              }
+              else
+              {
+                <td>—</td>
+              }
+              @if (!deposit.Closed && deposit.Revocable)
+              {
+                <td class="pointerCursor alert alert-danger" @onclick="@(() => CloseDeposit(deposit))" @onclick:preventDefault><span class="fa fa-window-close" /></td>
+              }
+              else
+              {
+                <td>—</td>
+              }
+            </tr>
           }
         </tbody>
       </table>
@@ -130,6 +133,21 @@
         <footer class="blockquote-footer"><cite>Add first</cite></footer>
       </blockquote>
     }
+  </div>
+
+  @* DELETION MODAL *@
+  <div class="modal fade" id="deleteConfirmation" tabindex="-1" data-backdrop="false">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-body d-flex justify-content-center row">
+          <h1 class="text-center m-5">Do you realy want to close deposit?</h1>
+          <div class="btn-group btn-group-lg mb-2">
+            <button type="button" class="btn btn-danger" @onclick="@(async () => { await DepositDeletion(); await ToggleModal("#deleteConfirmation"); })" @onclick:preventDefault>Yes</button>
+            <button type="button" class="btn btn-secondary" @onclick="@(async () => { CloseDepositDto = null; await ToggleModal("#deleteConfirmation"); })" @onclick:preventDefault>No</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -156,15 +174,35 @@
     _deposits = await depositsService.GetDepositsAsync();
   }
 
+  private DepositDto CloseDepositDto;
+
+  private async Task ToggleModal(string modalSelector)
+  {
+    await JSRuntime.InvokeVoidAsync("ShowModal", modalSelector);
+  }
+
   private async Task CloseDeposit(DepositDto deposit)
   {
+    CloseDepositDto = deposit;
+    await ToggleModal("#deleteConfirmation");
+  }
+
+  private async Task DepositDeletion()
+  {
+    if (CloseDepositDto is null)
+    {
+      return;
+    }
+
     using var scope = serviceScopeFactory.CreateScope();
     var depositsService = scope.ServiceProvider.GetService<DepositsService>();
-    var result = await depositsService.CloseDepositAsync(deposit.ID);
+    var result = await depositsService.CloseDepositAsync(CloseDepositDto.ID);
 
     if (result.Success)
     {
-      deposit.Closed = true;
+      CloseDepositDto.Closed = true;
     }
+
+    CloseDepositDto = null;
   }
 }
