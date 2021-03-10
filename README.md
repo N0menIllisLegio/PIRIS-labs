@@ -1,7 +1,7 @@
 # Labs (1-4) for "Design and development of information systems" course
 
 ## How to use
-Add in appsettings.json [ConnectionString](https://docs.microsoft.com/en-us/ef/core/miscellaneous/connection-strings) to DB ([no need to Update-Database](https://github.com/N0menIllisLegio/PIRIS-labs/blob/b4cf949f86ab8ffd16cbb84531c6a4eb31c7dd42/PIRIS-labs/Startup.cs#L57)):
+Add in appsettings.json [ConnectionString](https://docs.microsoft.com/en-us/ef/core/miscellaneous/connection-strings) to MSSQL ([no need to Update-Database](https://github.com/N0menIllisLegio/PIRIS-labs/blob/b4cf949f86ab8ffd16cbb84531c6a4eb31c7dd42/PIRIS-labs/Startup.cs#L57)):
 ```json
 "ConnectionStrings": {
   "LocalDB": "..."
